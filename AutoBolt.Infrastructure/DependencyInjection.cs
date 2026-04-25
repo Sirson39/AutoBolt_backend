@@ -1,4 +1,6 @@
+using AutoBolt.Application.Interfaces;
 using AutoBolt.Infrastructure.Data;
+using AutoBolt.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +15,13 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(AutoBoltDbContext).Assembly.FullName)));
 
-        // Repository registrations will go here later
+        // Repository registrations
+        services.AddScoped<IPartRepository, PartRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IVendorRepository, VendorRepository>();
+        services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         
         return services;
     }
