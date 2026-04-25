@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AutoBolt.API/AutoBolt.API.csproj" />
+  <Project Path="AutoBolt.Application/AutoBolt.Application.csproj" />
+  <Project Path="AutoBolt.Domain/AutoBolt.Domain.csproj" />
+  <Project Path="AutoBolt.Infrastructure/AutoBolt.Infrastructure.csproj" />
+</Solution>
