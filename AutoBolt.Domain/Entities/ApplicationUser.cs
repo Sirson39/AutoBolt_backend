@@ -8,6 +8,9 @@ public class ApplicationUser : IdentityUser<Guid>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
 
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
+
     // Navigation property for Customer if the user is a customer
     public Customer? CustomerDetails { get; set; }
 }

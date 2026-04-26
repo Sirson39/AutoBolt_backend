@@ -1,9 +1,14 @@
+using System.Text;
+using AutoBolt.Application.Common.Interfaces;
 using AutoBolt.Domain.Entities;
+using AutoBolt.Infrastructure.Authentication;
 using AutoBolt.Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AutoBolt.Infrastructure;
 
@@ -28,6 +33,27 @@ public static class DependencyInjection
         })
         .AddEntityFrameworkStores<AutoBoltDbContext>()
         .AddDefaultTokenProviders();
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = configuration["JwtSettings:Issuer"],
+                ValidAudience = configuration["JwtSettings:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"]!))
+            };
+        });
+
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         // Repository registrations will go here later
         
