@@ -1,3 +1,5 @@
+using AutoBolt.Domain.Enums;
+
 namespace AutoBolt.Domain.Entities;
 
 public class Vehicle : BaseEntity
@@ -8,6 +10,7 @@ public class Vehicle : BaseEntity
     public int Year { get; set; }
     public string? VIN { get; set; } // Vehicle Identification Number
     public double Mileage { get; set; } // Current mileage for AI prediction
+    public PlateType PlateType { get; set; } // Categorization for UI styling
     
     public int CustomerId { get; set; }
     public Customer? Owner { get; set; }
