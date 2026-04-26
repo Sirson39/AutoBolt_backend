@@ -27,7 +27,8 @@ public class PartService(IPartRepository partRepository) : IPartService
             Description = dto.Description,
             Price = dto.Price,
             StockQuantity = dto.StockQuantity,
-            Category = (PartCategory)dto.CategoryId
+            Category = (PartCategory)dto.CategoryId,
+            ImageUrl = dto.ImageUrl
         };
 
         await partRepository.AddAsync(part);
@@ -46,6 +47,7 @@ public class PartService(IPartRepository partRepository) : IPartService
         part.Price = dto.Price;
         part.StockQuantity = dto.StockQuantity;
         part.Category = (PartCategory)dto.CategoryId;
+        part.ImageUrl = dto.ImageUrl ?? part.ImageUrl; // Keep existing if not updated
         part.UpdatedAt = DateTime.UtcNow;
 
         partRepository.Update(part);
@@ -77,7 +79,8 @@ public class PartService(IPartRepository partRepository) : IPartService
             Price = part.Price,
             StockQuantity = part.StockQuantity,
             Category = part.Category.ToString(),
-            IsLowStock = part.IsLowStock
+            IsLowStock = part.IsLowStock,
+            ImageUrl = part.ImageUrl
         };
     }
 }

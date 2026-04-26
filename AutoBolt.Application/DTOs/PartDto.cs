@@ -9,6 +9,7 @@ public class PartDto
     public int StockQuantity { get; set; }
     public string Category { get; set; } = null!;
     public bool IsLowStock { get; set; }
+    public string? ImageUrl { get; set; }
 }
 
 public class PartCreateUpdateDto
@@ -18,4 +19,5 @@ public class PartCreateUpdateDto
     public decimal Price { get; set; }
     public int StockQuantity { get; set; }
     public int CategoryId { get; set; }
+    public string? ImageUrl { get; set; }
 }
