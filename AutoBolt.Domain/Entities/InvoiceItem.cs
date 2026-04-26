@@ -9,6 +9,6 @@ public class InvoiceItem : BaseEntity
     public Part? Part { get; set; }
     
     public int Quantity { get; set; }
-    public decimal UnitPrice { get; set; }
-    public decimal SubTotal => Quantity * UnitPrice;
+    public decimal UnitPrice { get; set; } // Price at the time of sale
+    public decimal SubTotal { get; set; }
 }
