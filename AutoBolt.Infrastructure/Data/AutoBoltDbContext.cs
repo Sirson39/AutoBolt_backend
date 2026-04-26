@@ -1,9 +1,10 @@
 using AutoBolt.Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoBolt.Infrastructure.Data;
 
-public class AutoBoltDbContext : DbContext
+public class AutoBoltDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public AutoBoltDbContext(DbContextOptions<AutoBoltDbContext> options) : base(options)
     {
@@ -23,6 +24,11 @@ public class AutoBoltDbContext : DbContext
 
         // Configure relationships and constraints
         
+        modelBuilder.Entity<ApplicationUser>()
+            .HasOne(u => u.CustomerDetails)
+            .WithOne(c => c.User)
+            .HasForeignKey<Customer>(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<InvoiceItem>()
             .HasOne(ii => ii.Invoice)
             .WithMany(i => i.Items)
