@@ -3,6 +3,7 @@ using System;
 using AutoBolt.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoBolt.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AutoBoltDbContext))]
-    partial class AutoBoltDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260426040653_SeedInitialData")]
+    partial class SeedInitialData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -192,9 +195,6 @@ namespace AutoBolt.Infrastructure.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -217,6 +217,44 @@ namespace AutoBolt.Infrastructure.Data.Migrations
                     b.HasIndex("VendorId");
 
                     b.ToTable("Parts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Category = 0,
+                            CreatedAt = new DateTime(2026, 4, 26, 4, 6, 52, 547, DateTimeKind.Utc).AddTicks(9091),
+                            Name = "V6 Engine Gasket",
+                            Price = 124.50m,
+                            StockQuantity = 8
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Category = 1,
+                            CreatedAt = new DateTime(2026, 4, 26, 4, 6, 52, 547, DateTimeKind.Utc).AddTicks(9335),
+                            Name = "Brake Pads Set",
+                            Price = 85.00m,
+                            StockQuantity = 25
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Category = 0,
+                            CreatedAt = new DateTime(2026, 4, 26, 4, 6, 52, 547, DateTimeKind.Utc).AddTicks(9337),
+                            Name = "Oil Filter",
+                            Price = 15.99m,
+                            StockQuantity = 50
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Category = 2,
+                            CreatedAt = new DateTime(2026, 4, 26, 4, 6, 52, 547, DateTimeKind.Utc).AddTicks(9350),
+                            Name = "Suspension Strut",
+                            Price = 210.00m,
+                            StockQuantity = 4
+                        });
                 });
 
             modelBuilder.Entity("AutoBolt.Domain.Entities.Vehicle", b =>
