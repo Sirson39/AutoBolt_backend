@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoBolt.Infrastructure.Data;
 
-public class AutoBoltDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+public class AutoBoltDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
 {
     public AutoBoltDbContext(DbContextOptions<AutoBoltDbContext> options) : base(options)
     {
