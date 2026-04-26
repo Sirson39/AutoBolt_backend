@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AutoBolt.Application.Features.Auth.Commands.ConfirmEmail;
 
-public record ConfirmEmailCommand(string Email, string Token) : IRequest<bool>;
+public record ConfirmEmailCommand(string Email, string OTP) : IRequest<bool>;
 
 public class ConfirmEmailCommandHandler : IRequestHandler<ConfirmEmailCommand, bool>
 {
@@ -23,7 +23,21 @@ public class ConfirmEmailCommandHandler : IRequestHandler<ConfirmEmailCommand, b
             throw new Exception("User not found.");
         }
 
-        var result = await _userManager.ConfirmEmailAsync(user, request.Token);
+        if (user.EmailConfirmationOTP != request.OTP)
+        {
+            throw new Exception("Invalid verification code.");
+        }
+
+        if (user.OTPExpiryTime < DateTime.UtcNow)
+        {
+            throw new Exception("Verification code has expired.");
+        }
+
+        user.EmailConfirmed = true;
+        user.EmailConfirmationOTP = null;
+        user.OTPExpiryTime = null;
+
+        var result = await _userManager.UpdateAsync(user);
         return result.Succeeded;
     }
 }

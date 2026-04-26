@@ -67,11 +67,14 @@ public class RegisterCustomerCommandHandler : IRequestHandler<RegisterCustomerCo
         }
         await _userManager.AddToRoleAsync(user, "Customer");
 
-        // Generate email confirmation token
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        // Generate 6-digit OTP
+        var otp = Random.Shared.Next(100000, 999999).ToString();
+        user.EmailConfirmationOTP = otp;
+        user.OTPExpiryTime = DateTime.UtcNow.AddMinutes(15);
         
-        // In a real app, you'd send a link. For now, we log the token.
-        var body = $"Please confirm your email using this token: {token}";
+        await _userManager.UpdateAsync(user);
+        
+        var body = $"Your verification code is: {otp}. It will expire in 15 minutes.";
         await _emailService.SendEmailAsync(user.Email, "Confirm your email", body);
 
         return true;

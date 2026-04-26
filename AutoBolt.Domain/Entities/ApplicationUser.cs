@@ -10,6 +10,9 @@ public class ApplicationUser : IdentityUser<Guid>
 
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
+    
+    public string? EmailConfirmationOTP { get; set; }
+    public DateTime? OTPExpiryTime { get; set; }
 
     // Navigation property for Customer if the user is a customer
     public Customer? CustomerDetails { get; set; }

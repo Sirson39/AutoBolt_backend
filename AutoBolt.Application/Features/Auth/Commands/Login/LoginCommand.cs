@@ -3,6 +3,7 @@ using AutoBolt.Application.Features.Auth.Common;
 using AutoBolt.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace AutoBolt.Application.Features.Auth.Commands.Login;
 
