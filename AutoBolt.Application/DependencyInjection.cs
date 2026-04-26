@@ -10,6 +10,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IPartService, PartService>();
         services.AddScoped<ICustomerService, CustomerService>();
+        services.AddScoped<IVendorService, VendorService>();
         
         // Other services will be registered here
         
