@@ -48,7 +48,7 @@ public class AutoBoltDbContext : DbContext
             .HasPrecision(18, 2);
 
         modelBuilder.Entity<Invoice>()
-            .Property(i => i.TotalAmount)
+            .Property(i => i.SubTotal)
             .HasPrecision(18, 2);
 
         modelBuilder.Entity<Invoice>()
@@ -56,11 +56,15 @@ public class AutoBoltDbContext : DbContext
             .HasPrecision(18, 2);
 
         modelBuilder.Entity<Invoice>()
-            .Property(i => i.FinalAmount)
+            .Property(i => i.TotalAmount)
             .HasPrecision(18, 2);
 
         modelBuilder.Entity<InvoiceItem>()
             .Property(ii => ii.UnitPrice)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<InvoiceItem>()
+            .Property(ii => ii.SubTotal)
             .HasPrecision(18, 2);
     }
 }

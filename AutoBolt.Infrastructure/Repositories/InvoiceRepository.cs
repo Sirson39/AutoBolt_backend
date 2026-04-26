@@ -7,12 +7,24 @@ namespace AutoBolt.Infrastructure.Repositories;
 
 public class InvoiceRepository(AutoBoltDbContext context) : GenericRepository<Invoice>(context), IInvoiceRepository
 {
-    public async Task<IEnumerable<Invoice>> GetInvoicesByDateRangeAsync(DateTime start, DateTime end)
+    public async Task<IEnumerable<Invoice>> GetAllWithDetailsAsync()
     {
         return await _dbSet
-            .Where(i => i.InvoiceDate >= start && i.InvoiceDate <= end)
+            .Include(i => i.Customer)
+            .Include(i => i.Vehicle)
             .Include(i => i.Items)
-            .ThenInclude(ii => ii.Part)
+                .ThenInclude(ii => ii.Part)
+            .OrderByDescending(i => i.InvoiceDate)
             .ToListAsync();
+    }
+
+    public async Task<Invoice?> GetByIdWithDetailsAsync(int id)
+    {
+        return await _dbSet
+            .Include(i => i.Customer)
+            .Include(i => i.Vehicle)
+            .Include(i => i.Items)
+                .ThenInclude(ii => ii.Part)
+            .FirstOrDefaultAsync(i => i.Id == id);
     }
 }
