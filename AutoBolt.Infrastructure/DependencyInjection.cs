@@ -3,6 +3,7 @@ using AutoBolt.Application.Common.Interfaces;
 using AutoBolt.Domain.Entities;
 using AutoBolt.Infrastructure.Authentication;
 using AutoBolt.Infrastructure.Data;
+using AutoBolt.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IEmailService, EmailService>();
 
         // Repository registrations will go here later
         
