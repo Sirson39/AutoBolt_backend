@@ -16,6 +16,7 @@ public class AutoBoltDbContext : DbContext
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<InvoiceItem> InvoiceItems { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
