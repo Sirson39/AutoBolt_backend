@@ -1,10 +1,14 @@
 using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
 using AutoBolt.Domain.Entities;
+using AutoBolt.Domain.Enums;
 
 namespace AutoBolt.Application.Services;
 
-public class CustomerService(ICustomerRepository customerRepository, IVehicleRepository vehicleRepository) : ICustomerService
+public class CustomerService(
+    ICustomerRepository customerRepository,
+    IVehicleRepository vehicleRepository,
+    IInvoiceRepository invoiceRepository) : ICustomerService
 {
     public async Task<IEnumerable<CustomerDto>> GetAllCustomersAsync()
     {
@@ -42,6 +46,50 @@ public class CustomerService(ICustomerRepository customerRepository, IVehicleRep
                 Contains(customer.Address, term) ||
                 matchedCustomerIds.Contains(customer.Id))
             .Select(MapToDto);
+    }
+
+    public async Task<CustomerHistoryDto?> GetCustomerHistoryAsync(int id)
+    {
+        var customer = await customerRepository.GetByIdAsync(id);
+        if (customer == null)
+        {
+            return null;
+        }
+
+        var vehicles = await vehicleRepository.GetVehiclesByCustomerIdAsync(id);
+        var invoices = await invoiceRepository.GetAllWithDetailsAsync();
+
+        return new CustomerHistoryDto
+        {
+            CustomerId = customer.Id,
+            FullName = customer.FullName,
+            Email = customer.Email,
+            Phone = customer.Phone,
+            Address = customer.Address,
+            CreditBalance = customer.CreditBalance,
+            Vehicles = vehicles.Select(vehicle => new CustomerVehicleHistoryDto
+            {
+                Id = vehicle.Id,
+                LicensePlate = vehicle.LicensePlate,
+                Make = vehicle.Make,
+                Model = vehicle.Model,
+                Year = vehicle.Year,
+                Mileage = vehicle.Mileage
+            }).ToList(),
+            Invoices = invoices
+                .Where(invoice => invoice.CustomerId == id)
+                .OrderByDescending(invoice => invoice.InvoiceDate)
+                .Select(invoice => new CustomerInvoiceHistoryDto
+                {
+                    Id = invoice.Id,
+                    InvoiceNumber = invoice.InvoiceNumber,
+                    InvoiceDate = invoice.InvoiceDate,
+                    VehiclePlate = invoice.Vehicle?.LicensePlate ?? "N/A",
+                    TotalAmount = invoice.TotalAmount,
+                    Status = invoice.Status.ToString()
+                })
+                .ToList()
+        };
     }
 
     public async Task<CustomerDto> CreateCustomerAsync(CustomerCreateUpdateDto dto)
