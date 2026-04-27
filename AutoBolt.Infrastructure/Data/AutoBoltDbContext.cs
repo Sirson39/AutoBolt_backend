@@ -17,6 +17,8 @@ public class AutoBoltDbContext : DbContext
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<InvoiceItem> InvoiceItems { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
+    public DbSet<PurchaseInvoiceItem> PurchaseInvoiceItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +30,11 @@ public class AutoBoltDbContext : DbContext
             .HasOne(ii => ii.Invoice)
             .WithMany(i => i.Items)
             .HasForeignKey(ii => ii.InvoiceId);
+
+        modelBuilder.Entity<PurchaseInvoiceItem>()
+            .HasOne(pii => pii.PurchaseInvoice)
+            .WithMany(pi => pi.Items)
+            .HasForeignKey(pii => pii.PurchaseInvoiceId);
 
         modelBuilder.Entity<Vehicle>()
             .HasOne(v => v.Owner)
@@ -66,6 +73,18 @@ public class AutoBoltDbContext : DbContext
 
         modelBuilder.Entity<InvoiceItem>()
             .Property(ii => ii.SubTotal)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<PurchaseInvoice>()
+            .Property(pi => pi.TotalAmount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<PurchaseInvoiceItem>()
+            .Property(pii => pii.UnitCost)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<PurchaseInvoiceItem>()
+            .Property(pii => pii.Subtotal)
             .HasPrecision(18, 2);
     }
 }
