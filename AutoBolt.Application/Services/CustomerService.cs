@@ -4,7 +4,7 @@ using AutoBolt.Domain.Entities;
 
 namespace AutoBolt.Application.Services;
 
-public class CustomerService(ICustomerRepository customerRepository) : ICustomerService
+public class CustomerService(ICustomerRepository customerRepository, IVehicleRepository vehicleRepository) : ICustomerService
 {
     public async Task<IEnumerable<CustomerDto>> GetAllCustomersAsync()
     {
@@ -16,6 +16,32 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
     {
         var customer = await customerRepository.GetByIdAsync(id);
         return customer != null ? MapToDto(customer) : null;
+    }
+
+    public async Task<IEnumerable<CustomerDto>> SearchCustomersAsync(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return await GetAllCustomersAsync();
+        }
+
+        var term = query.Trim();
+        var customers = await customerRepository.GetAllAsync();
+        var vehicles = await vehicleRepository.GetAllAsync();
+
+        var matchedCustomerIds = vehicles
+            .Where(vehicle => Contains(vehicle.LicensePlate, term))
+            .Select(vehicle => vehicle.CustomerId)
+            .ToHashSet();
+
+        return customers
+            .Where(customer =>
+                Contains(customer.FullName, term) ||
+                Contains(customer.Email, term) ||
+                Contains(customer.Phone, term) ||
+                Contains(customer.Address, term) ||
+                matchedCustomerIds.Contains(customer.Id))
+            .Select(MapToDto);
     }
 
     public async Task<CustomerDto> CreateCustomerAsync(CustomerCreateUpdateDto dto)
@@ -70,5 +96,11 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
             Address = customer.Address,
             CreditBalance = customer.CreditBalance
         };
+    }
+
+    private static bool Contains(string? source, string term)
+    {
+        return !string.IsNullOrWhiteSpace(source) &&
+               source.Contains(term, StringComparison.OrdinalIgnoreCase);
     }
 }
