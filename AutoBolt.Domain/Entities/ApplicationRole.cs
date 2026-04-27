@@ -1,9 +1,14 @@
-using Microsoft.AspNetCore.Identity;
-
 namespace AutoBolt.Domain.Entities;
 
-public class ApplicationRole : IdentityRole<int>
+public class ApplicationRole : BaseEntity
 {
-    public ApplicationRole() : base() { }
-    public ApplicationRole(string roleName) : base(roleName) { }
+    public string Name { get; set; } = string.Empty;
+
+    public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+
+    public ApplicationRole() { }
+    public ApplicationRole(string name)
+    {
+        Name = name;
+    }
 }

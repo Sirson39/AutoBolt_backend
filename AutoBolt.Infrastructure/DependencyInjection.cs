@@ -21,20 +21,6 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(AutoBoltDbContext).Assembly.FullName)));
 
-        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-        {
-            options.Password.RequireDigit = true;
-            options.Password.RequireLowercase = true;
-            options.Password.RequireUppercase = true;
-            options.Password.RequireNonAlphanumeric = true;
-            options.Password.RequiredLength = 8;
-            
-            options.User.RequireUniqueEmail = true;
-            options.SignIn.RequireConfirmedEmail = true; // Enabled as per user request
-        })
-        .AddEntityFrameworkStores<AutoBoltDbContext>()
-        .AddDefaultTokenProviders();
-
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -56,9 +42,9 @@ public static class DependencyInjection
 
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IPasswordHasher<ApplicationUser>, PasswordHasher<ApplicationUser>>();
+        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<AutoBoltDbContext>());
 
-        // Repository registrations will go here later
-        
         return services;
     }
 }

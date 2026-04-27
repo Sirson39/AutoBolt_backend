@@ -1,15 +1,19 @@
+using AutoBolt.Application.Common.Interfaces;
 using AutoBolt.Domain.Entities;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoBolt.Infrastructure.Data;
 
-public class AutoBoltDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
+public class AutoBoltDbContext : DbContext, IApplicationDbContext
 {
     public AutoBoltDbContext(DbContextOptions<AutoBoltDbContext> options) : base(options)
     {
     }
 
+    public DbSet<ApplicationUser> Users { get; set; }
+    public DbSet<ApplicationRole> Roles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
+    
     public DbSet<Part> Parts { get; set; }
     public DbSet<Vehicle> Vehicles { get; set; }
     public DbSet<Vendor> Vendors { get; set; }
@@ -22,13 +26,23 @@ public class AutoBoltDbContext : IdentityDbContext<ApplicationUser, ApplicationR
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configure relationships and constraints
-        
+        // Configure User-Role Many-to-Many
+        modelBuilder.Entity<UserRole>()
+            .HasOne(ur => ur.User)
+            .WithMany(u => u.UserRoles)
+            .HasForeignKey(ur => ur.UserId);
+
+        modelBuilder.Entity<UserRole>()
+            .HasOne(ur => ur.Role)
+            .WithMany(r => r.UserRoles)
+            .HasForeignKey(ur => ur.RoleId);
+
         modelBuilder.Entity<ApplicationUser>()
             .HasOne(u => u.CustomerDetails)
             .WithOne(c => c.User)
             .HasForeignKey<Customer>(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<InvoiceItem>()
             .HasOne(ii => ii.Invoice)
             .WithMany(i => i.Items)

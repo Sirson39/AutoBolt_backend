@@ -1,3 +1,4 @@
+using AutoBolt.API.Middleware;
 using AutoBolt.Application;
 using AutoBolt.Infrastructure;
 using AutoBolt.Infrastructure.Data;
@@ -14,6 +15,8 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Initialize and Seed Database
 using (var scope = app.Services.CreateScope())
