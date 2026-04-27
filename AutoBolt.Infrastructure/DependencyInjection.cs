@@ -1,6 +1,7 @@
 using AutoBolt.Application.Interfaces;
 using AutoBolt.Infrastructure.Data;
 using AutoBolt.Infrastructure.Repositories;
+using AutoBolt.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<IInvoiceRepository, InvoiceRepository>();
         services.AddScoped<IVehicleRepository, VehicleRepository>();
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        services.AddScoped<IReportService, ReportService>();
         
         return services;
     }
