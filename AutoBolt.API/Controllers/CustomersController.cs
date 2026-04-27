@@ -15,6 +15,13 @@ public class CustomersController(ICustomerService customerService) : ControllerB
         return Ok(customers);
     }
 
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<CustomerDto>>> Search([FromQuery] string query)
+    {
+        var customers = await customerService.SearchCustomersAsync(query);
+        return Ok(customers);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<CustomerDto>> GetById(int id)
     {
