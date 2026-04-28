@@ -23,7 +23,7 @@ public class StaffService : IStaffService
                 Id = u.Id,
                 FullName = u.FullName,
                 Email = u.Email,
-                Phone = u.Phone,
+                Phone = u.PhoneNumber,
                 Role = u.Role,
                 IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt
@@ -41,7 +41,7 @@ public class StaffService : IStaffService
             Id = u.Id,
             FullName = u.FullName,
             Email = u.Email,
-            Phone = u.Phone,
+            Phone = u.PhoneNumber,
             Role = u.Role,
             IsActive = u.IsActive,
             CreatedAt = u.CreatedAt
@@ -55,7 +55,7 @@ public class StaffService : IStaffService
             FullName = dto.FullName,
             Email = dto.Email,
             PasswordHash = dto.Password, // Ideally hashed
-            Phone = dto.Phone,
+            PhoneNumber = dto.Phone,
             Role = dto.Role,
             IsActive = true
         };
@@ -68,7 +68,7 @@ public class StaffService : IStaffService
             Id = user.Id,
             FullName = user.FullName,
             Email = user.Email,
-            Phone = user.Phone,
+            Phone = user.PhoneNumber,
             Role = user.Role,
             IsActive = user.IsActive,
             CreatedAt = user.CreatedAt
@@ -82,7 +82,7 @@ public class StaffService : IStaffService
 
         user.FullName = dto.FullName;
         user.Email = dto.Email;
-        user.Phone = dto.Phone;
+        user.PhoneNumber = dto.Phone;
         user.Role = dto.Role;
         
         if (!string.IsNullOrEmpty(dto.Password))

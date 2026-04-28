@@ -1,9 +1,11 @@
 using AutoBolt.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoBolt.Infrastructure.Data;
 
-public class AutoBoltDbContext : DbContext
+public class AutoBoltDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 {
     public AutoBoltDbContext(DbContextOptions<AutoBoltDbContext> options) : base(options)
     {
@@ -16,7 +18,6 @@ public class AutoBoltDbContext : DbContext
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<InvoiceItem> InvoiceItems { get; set; }
-    public DbSet<User> Users { get; set; }
     public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
     public DbSet<PurchaseInvoiceItem> PurchaseInvoiceItems { get; set; }
 
