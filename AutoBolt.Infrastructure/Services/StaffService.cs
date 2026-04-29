@@ -1,116 +1,138 @@
 using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
-using AutoBolt.Domain.Entities;
-using AutoBolt.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using AutoBolt.Domain.Enums;
+using AutoBolt.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace AutoBolt.Infrastructure.Services;
 
 public class StaffService : IStaffService
 {
-    private readonly AutoBoltDbContext _context;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailService _emailService;
 
-    public StaffService(AutoBoltDbContext context)
+    public StaffService(UserManager<ApplicationUser> userManager, IEmailService emailService)
     {
-        _context = context;
+        _userManager = userManager;
+        _emailService = emailService;
     }
 
     public async Task<IEnumerable<UserDto>> GetAllStaffAsync()
     {
-        return await _context.Users
-            .Select(u => new UserDto
-            {
-                Id = u.Id,
-                FullName = u.FullName,
-                Email = u.Email,
-                Phone = u.Phone,
-                Role = u.Role,
-                IsActive = u.IsActive,
-                CreatedAt = u.CreatedAt
-            })
-            .ToListAsync();
+        var admins = await _userManager.GetUsersInRoleAsync("Admin");
+        var staff = await _userManager.GetUsersInRoleAsync("Staff");
+
+        return admins.Select(u => MapToDto(u, UserRole.Admin))
+            .Concat(staff.Select(u => MapToDto(u, UserRole.Staff)))
+            .OrderBy(u => u.FullName);
     }
 
     public async Task<UserDto?> GetStaffByIdAsync(int id)
     {
-        var u = await _context.Users.FindAsync(id);
-        if (u == null) return null;
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null) return null;
 
-        return new UserDto
-        {
-            Id = u.Id,
-            FullName = u.FullName,
-            Email = u.Email,
-            Phone = u.Phone,
-            Role = u.Role,
-            IsActive = u.IsActive,
-            CreatedAt = u.CreatedAt
-        };
+        var roles = await _userManager.GetRolesAsync(user);
+        var role = ParseRole(roles.FirstOrDefault());
+        return MapToDto(user, role);
     }
 
     public async Task<UserDto> CreateStaffAsync(CreateUserDto dto)
     {
-        var user = new User
+        var user = new ApplicationUser
         {
-            FullName = dto.FullName,
+            UserName = dto.Email,
             Email = dto.Email,
-            PasswordHash = dto.Password, // Ideally hashed
-            Phone = dto.Phone,
-            Role = dto.Role,
+            FullName = dto.FullName,
+            PhoneNumber = dto.Phone,
             IsActive = true
         };
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        return new UserDto
+        var result = await _userManager.CreateAsync(user, dto.Password);
+        if (!result.Succeeded)
         {
-            Id = user.Id,
-            FullName = user.FullName,
-            Email = user.Email,
-            Phone = user.Phone,
-            Role = user.Role,
-            IsActive = user.IsActive,
-            CreatedAt = user.CreatedAt
-        };
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Failed to create staff: {errors}");
+        }
+
+        var roleName = dto.Role.ToString();
+        await _userManager.AddToRoleAsync(user, roleName);
+
+        // Email credentials to the new staff member
+        await _emailService.SendStaffCredentialsAsync(dto.Email, dto.FullName, dto.Password);
+
+        return MapToDto(user, dto.Role);
     }
 
     public async Task<bool> UpdateStaffAsync(int id, CreateUserDto dto)
     {
-        var user = await _context.Users.FindAsync(id);
+        var user = await _userManager.FindByIdAsync(id.ToString());
         if (user == null) return false;
 
         user.FullName = dto.FullName;
         user.Email = dto.Email;
-        user.Phone = dto.Phone;
-        user.Role = dto.Role;
-        
-        if (!string.IsNullOrEmpty(dto.Password))
+        user.UserName = dto.Email;
+        user.PhoneNumber = dto.Phone;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded) return false;
+
+        if (!string.IsNullOrWhiteSpace(dto.Password))
         {
-            user.PasswordHash = dto.Password;
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            await _userManager.ResetPasswordAsync(user, token, dto.Password);
         }
 
-        await _context.SaveChangesAsync();
+        // Update role if changed
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        var newRole = dto.Role.ToString();
+        if (!currentRoles.Contains(newRole))
+        {
+            await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            await _userManager.AddToRoleAsync(user, newRole);
+        }
+
         return true;
     }
 
     public async Task<bool> DeleteStaffAsync(int id)
     {
-        var user = await _context.Users.FindAsync(id);
+        var user = await _userManager.FindByIdAsync(id.ToString());
         if (user == null) return false;
 
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
-        return true;
+        var result = await _userManager.DeleteAsync(user);
+        return result.Succeeded;
     }
 
     public async Task<bool> ToggleStatusAsync(int id)
     {
-        var user = await _context.Users.FindAsync(id);
+        var user = await _userManager.FindByIdAsync(id.ToString());
         if (user == null) return false;
 
         user.IsActive = !user.IsActive;
-        await _context.SaveChangesAsync();
-        return true;
+        var result = await _userManager.UpdateAsync(user);
+        return result.Succeeded;
     }
+
+    private static UserDto MapToDto(ApplicationUser user, UserRole role)
+    {
+        return new UserDto
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email ?? string.Empty,
+            Phone = user.PhoneNumber ?? string.Empty,
+            Role = role,
+            IsActive = user.IsActive,
+            CreatedAt = DateTime.UtcNow
+        };
+    }
+
+    private static UserRole ParseRole(string? roleName) =>
+        roleName switch
+        {
+            "Admin" => UserRole.Admin,
+            "Staff" => UserRole.Staff,
+            _ => UserRole.Staff
+        };
 }
