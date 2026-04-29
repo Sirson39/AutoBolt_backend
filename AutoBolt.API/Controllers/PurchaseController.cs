@@ -1,13 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBolt.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class PurchaseController : ControllerBase
     {
         private readonly IPurchaseService _purchaseService;

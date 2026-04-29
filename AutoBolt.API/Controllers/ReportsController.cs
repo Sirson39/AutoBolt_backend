@@ -1,11 +1,13 @@
 using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBolt.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Staff")]
 public class ReportsController(IReportService reportService) : ControllerBase
 {
     [HttpGet("sales")]
