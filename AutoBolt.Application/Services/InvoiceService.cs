@@ -9,7 +9,8 @@ public class InvoiceService(
     IInvoiceRepository invoiceRepository,
     IGenericRepository<Part> partRepository,
     IGenericRepository<Customer> customerRepository,
-    IGenericRepository<Vehicle> vehicleRepository) : IInvoiceService
+    IGenericRepository<Vehicle> vehicleRepository,
+    IEmailService emailService) : IInvoiceService
 {
     public async Task<IEnumerable<InvoiceDto>> GetAllInvoicesAsync()
     {
@@ -106,6 +107,29 @@ public class InvoiceService(
         
         invoiceRepository.Update(invoice);
         await invoiceRepository.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> EmailInvoiceAsync(int id, string? recipientEmail = null)
+    {
+        var invoice = await invoiceRepository.GetByIdWithDetailsAsync(id);
+        if (invoice == null)
+        {
+            return false;
+        }
+
+        var emailToSend = recipientEmail;
+        if (string.IsNullOrWhiteSpace(emailToSend))
+        {
+            emailToSend = invoice.Customer?.Email;
+        }
+
+        if (string.IsNullOrWhiteSpace(emailToSend))
+        {
+            throw new Exception("Customer email is missing. Provide a recipient email or update the customer record.");
+        }
+
+        await emailService.SendInvoiceEmailAsync(emailToSend, MapToDto(invoice));
         return true;
     }
 

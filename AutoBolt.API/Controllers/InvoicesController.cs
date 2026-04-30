@@ -50,4 +50,19 @@ public class InvoicesController(IInvoiceService invoiceService) : ControllerBase
         if (!result) return NotFound();
         return NoContent();
     }
+
+    [HttpPost("{id}/email")]
+    public async Task<IActionResult> EmailInvoice(int id, [FromQuery] string? recipientEmail = null)
+    {
+        try
+        {
+            var result = await invoiceService.EmailInvoiceAsync(id, recipientEmail);
+            if (!result) return NotFound();
+            return Ok(new { message = "Invoice email sent successfully." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }
