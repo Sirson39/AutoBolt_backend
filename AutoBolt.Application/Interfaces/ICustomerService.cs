@@ -9,6 +9,7 @@ public interface ICustomerService
     Task<IEnumerable<CustomerDto>> SearchCustomersAsync(string query);
     Task<CustomerHistoryDto?> GetCustomerHistoryAsync(int id);
     Task<CustomerDto> CreateCustomerAsync(CustomerCreateUpdateDto dto);
+    Task<CustomerRegistrationResultDto> RegisterCustomerWithVehicleAsync(CustomerRegistrationDto dto);
     Task UpdateCustomerAsync(int id, CustomerCreateUpdateDto dto);
     Task DeleteCustomerAsync(int id);
 }

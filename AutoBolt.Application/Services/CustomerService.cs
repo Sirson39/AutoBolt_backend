@@ -32,11 +32,26 @@ public class CustomerService(
         var term = query.Trim();
         var customers = await customerRepository.GetAllAsync();
         var vehicles = await vehicleRepository.GetAllAsync();
+        var matchedCustomerIds = new HashSet<int>();
 
-        var matchedCustomerIds = vehicles
-            .Where(vehicle => Contains(vehicle.LicensePlate, term))
-            .Select(vehicle => vehicle.CustomerId)
-            .ToHashSet();
+        if (int.TryParse(term, out var numericTerm))
+        {
+            matchedCustomerIds.Add(numericTerm);
+            foreach (var customer in customers.Where(customer => customer.Id == numericTerm))
+            {
+                matchedCustomerIds.Add(customer.Id);
+            }
+        }
+
+        foreach (var vehicle in vehicles)
+        {
+            if (Contains(vehicle.LicensePlate, term) ||
+                Contains(vehicle.VIN, term) ||
+                vehicle.Id.ToString().Contains(term, StringComparison.OrdinalIgnoreCase))
+            {
+                matchedCustomerIds.Add(vehicle.CustomerId);
+            }
+        }
 
         return customers
             .Where(customer =>
@@ -44,6 +59,7 @@ public class CustomerService(
                 Contains(customer.Email, term) ||
                 Contains(customer.Phone, term) ||
                 Contains(customer.Address, term) ||
+                customer.Id.ToString().Contains(term, StringComparison.OrdinalIgnoreCase) ||
                 matchedCustomerIds.Contains(customer.Id))
             .Select(MapToDto);
     }
@@ -109,6 +125,61 @@ public class CustomerService(
         return MapToDto(customer);
     }
 
+    public async Task<CustomerRegistrationResultDto> RegisterCustomerWithVehicleAsync(CustomerRegistrationDto dto)
+    {
+        var customers = await customerRepository.GetAllAsync();
+        var duplicateCustomer = customers.FirstOrDefault(customer =>
+            (!string.IsNullOrWhiteSpace(dto.Email) &&
+             string.Equals(customer.Email, dto.Email.Trim(), StringComparison.OrdinalIgnoreCase)) ||
+            string.Equals(customer.Phone, dto.Phone.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        if (duplicateCustomer != null)
+        {
+            throw new ArgumentException("A customer with the same phone number or email already exists.");
+        }
+
+        var vehicles = await vehicleRepository.GetAllAsync();
+        if (vehicles.Any(vehicle =>
+                string.Equals(vehicle.LicensePlate, dto.VehicleLicensePlate.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new ArgumentException("A vehicle with the same registration number already exists.");
+        }
+
+        var customer = new Customer
+        {
+            FullName = dto.FullName.Trim(),
+            Email = string.IsNullOrWhiteSpace(dto.Email) ? null : dto.Email.Trim(),
+            Phone = dto.Phone.Trim(),
+            Address = string.IsNullOrWhiteSpace(dto.Address) ? null : dto.Address.Trim(),
+            CreditBalance = 0
+        };
+
+        await customerRepository.AddAsync(customer);
+        await customerRepository.SaveChangesAsync();
+
+        var vehicle = new Vehicle
+        {
+            LicensePlate = dto.VehicleLicensePlate.Trim(),
+            Make = dto.VehicleMake.Trim(),
+            Model = dto.VehicleModel.Trim(),
+            Year = dto.VehicleYear,
+            Mileage = dto.VehicleMileage,
+            PlateType = (PlateType)dto.VehiclePlateType,
+            CustomerId = customer.Id
+        };
+
+        await vehicleRepository.AddAsync(vehicle);
+        await vehicleRepository.SaveChangesAsync();
+
+        var savedVehicle = await vehicleRepository.GetByIdAsync(vehicle.Id);
+
+        return new CustomerRegistrationResultDto
+        {
+            Customer = MapToDto(customer),
+            Vehicle = MapToVehicleDto(savedVehicle ?? vehicle)
+        };
+    }
+
     public async Task UpdateCustomerAsync(int id, CustomerCreateUpdateDto dto)
     {
         var customer = await customerRepository.GetByIdAsync(id);
@@ -150,5 +221,20 @@ public class CustomerService(
     {
         return !string.IsNullOrWhiteSpace(source) &&
                source.Contains(term, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static VehicleDto MapToVehicleDto(Vehicle vehicle)
+    {
+        return new VehicleDto
+        {
+            Id = vehicle.Id,
+            LicensePlate = vehicle.LicensePlate,
+            Make = vehicle.Make,
+            Model = vehicle.Model,
+            Year = vehicle.Year,
+            Mileage = vehicle.Mileage,
+            PlateType = (int)vehicle.PlateType,
+            OwnerName = vehicle.Owner?.FullName ?? "Unknown"
+        };
     }
 }
