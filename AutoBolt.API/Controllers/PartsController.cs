@@ -24,6 +24,13 @@ public class PartsController(IPartService partService, IWebHostEnvironment env) 
         return Ok(part);
     }
 
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<PartDto>>> Search([FromQuery] string query)
+    {
+        var parts = await partService.SearchPartsAsync(query);
+        return Ok(parts);
+    }
+
     [HttpGet("low-stock")]
     public async Task<ActionResult<IEnumerable<PartDto>>> GetLowStock()
     {

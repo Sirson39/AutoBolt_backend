@@ -37,6 +37,12 @@ public class InvoicesController(IInvoiceService invoiceService) : ControllerBase
         }
     }
 
+    [HttpPost("checkout")]
+    public async Task<ActionResult<InvoiceDto>> Checkout(InvoiceCreateDto dto)
+    {
+        return await Create(dto);
+    }
+
     [HttpDelete("{id}/cancel")]
     public async Task<IActionResult> Cancel(int id)
     {

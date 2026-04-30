@@ -25,6 +25,17 @@ public class InvoiceService(
 
     public async Task<InvoiceDto> CreateInvoiceAsync(InvoiceCreateDto dto)
     {
+        var customerExists = await customerRepository.GetByIdAsync(dto.CustomerId) != null;
+        if (!customerExists)
+            throw new Exception($"Customer with ID {dto.CustomerId} not found.");
+
+        if (dto.VehicleId.HasValue)
+        {
+            var vehicleExists = await vehicleRepository.GetByIdAsync(dto.VehicleId.Value) != null;
+            if (!vehicleExists)
+                throw new Exception($"Vehicle with ID {dto.VehicleId.Value} not found.");
+        }
+
         var invoice = new Invoice
         {
             InvoiceNumber = $"INV-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}",
@@ -72,7 +83,9 @@ public class InvoiceService(
             invoice.DiscountAmount = 0;
         }
 
-        invoice.TotalAmount = invoice.SubTotal - invoice.DiscountAmount;
+        var taxRate = dto.TaxRate < 0 ? 0m : dto.TaxRate;
+        var taxAmount = (invoice.SubTotal - invoice.DiscountAmount) * taxRate;
+        invoice.TotalAmount = invoice.SubTotal - invoice.DiscountAmount + taxAmount;
 
         await invoiceRepository.AddAsync(invoice);
         await invoiceRepository.SaveChangesAsync();
@@ -107,6 +120,7 @@ public class InvoiceService(
             VehiclePlate = invoice.Vehicle?.LicensePlate ?? "N/A",
             SubTotal = invoice.SubTotal,
             DiscountAmount = invoice.DiscountAmount,
+            TaxAmount = Math.Max(invoice.TotalAmount - invoice.SubTotal + invoice.DiscountAmount, 0m),
             TotalAmount = invoice.TotalAmount,
             Status = invoice.Status.ToString(),
             Items = invoice.Items.Select(ii => new InvoiceItemDto

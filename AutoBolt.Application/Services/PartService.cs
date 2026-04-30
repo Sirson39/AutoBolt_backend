@@ -19,6 +19,25 @@ public class PartService(IPartRepository partRepository) : IPartService
         return part != null ? MapToDto(part) : null;
     }
 
+    public async Task<IEnumerable<PartDto>> SearchPartsAsync(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return await GetAllPartsAsync();
+        }
+
+        var term = query.Trim();
+        var parts = await partRepository.GetAllAsync();
+
+        return parts
+            .Where(part =>
+                Contains(part.Name, term) ||
+                Contains(part.Description, term) ||
+                Contains(part.Category.ToString(), term) ||
+                part.Id.ToString().Contains(term, StringComparison.OrdinalIgnoreCase))
+            .Select(MapToDto);
+    }
+
     public async Task<PartDto> CreatePartAsync(PartCreateUpdateDto dto)
     {
         var part = new Part
@@ -82,5 +101,11 @@ public class PartService(IPartRepository partRepository) : IPartService
             IsLowStock = part.IsLowStock,
             ImageUrl = part.ImageUrl
         };
+    }
+
+    private static bool Contains(string? source, string term)
+    {
+        return !string.IsNullOrWhiteSpace(source) &&
+               source.Contains(term, StringComparison.OrdinalIgnoreCase);
     }
 }
