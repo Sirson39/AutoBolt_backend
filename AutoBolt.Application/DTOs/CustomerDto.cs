@@ -75,6 +75,8 @@ public class CustomerHistoryDto
     public string? Address { get; set; }
     public decimal CreditBalance { get; set; }
     public List<CustomerVehicleHistoryDto> Vehicles { get; set; } = new();
+    public List<CustomerPartPurchaseHistoryDto> PurchasedParts { get; set; } = new();
+    public List<CustomerServiceRecordDto> ServiceRecords { get; set; } = new();
     public List<CustomerInvoiceHistoryDto> Invoices { get; set; } = new();
 }
 
@@ -96,4 +98,26 @@ public class CustomerInvoiceHistoryDto
     public string VehiclePlate { get; set; } = null!;
     public decimal TotalAmount { get; set; }
     public string Status { get; set; } = null!;
+}
+
+public class CustomerPartPurchaseHistoryDto
+{
+    public int InvoiceId { get; set; }
+    public string InvoiceNumber { get; set; } = null!;
+    public DateTime InvoiceDate { get; set; }
+    public string VehiclePlate { get; set; } = null!;
+    public int PartId { get; set; }
+    public string PartName { get; set; } = null!;
+    public int Quantity { get; set; }
+    public decimal UnitPrice { get; set; }
+    public decimal SubTotal { get; set; }
+}
+
+public class CustomerServiceRecordDto
+{
+    public int Id { get; set; }
+    public DateTime ServiceDate { get; set; }
+    public string? Description { get; set; }
+    public string Status { get; set; } = null!;
+    public string VehiclePlate { get; set; } = null!;
 }

@@ -8,7 +8,8 @@ namespace AutoBolt.Application.Services;
 public class CustomerService(
     ICustomerRepository customerRepository,
     IVehicleRepository vehicleRepository,
-    IInvoiceRepository invoiceRepository) : ICustomerService
+    IInvoiceRepository invoiceRepository,
+    IBookingRepository bookingRepository) : ICustomerService
 {
     public async Task<IEnumerable<CustomerDto>> GetAllCustomersAsync()
     {
@@ -74,6 +75,24 @@ public class CustomerService(
 
         var vehicles = await vehicleRepository.GetVehiclesByCustomerIdAsync(id);
         var invoices = await invoiceRepository.GetAllWithDetailsAsync();
+        var bookings = await bookingRepository.GetBookingsByCustomerIdAsync(id);
+        var vehiclePlateLookup = vehicles.ToDictionary(vehicle => vehicle.Id, vehicle => vehicle.LicensePlate);
+        var purchasedParts = invoices
+            .Where(invoice => invoice.CustomerId == id)
+            .SelectMany(invoice => invoice.Items.Select(item => new CustomerPartPurchaseHistoryDto
+            {
+                InvoiceId = invoice.Id,
+                InvoiceNumber = invoice.InvoiceNumber,
+                InvoiceDate = invoice.InvoiceDate,
+                VehiclePlate = invoice.Vehicle?.LicensePlate ?? "N/A",
+                PartId = item.PartId,
+                PartName = item.Part?.Name ?? $"Part #{item.PartId}",
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                SubTotal = item.SubTotal
+            }))
+            .OrderByDescending(item => item.InvoiceDate)
+            .ToList();
 
         return new CustomerHistoryDto
         {
@@ -91,6 +110,17 @@ public class CustomerService(
                 Model = vehicle.Model,
                 Year = vehicle.Year,
                 Mileage = vehicle.Mileage
+            }).ToList(),
+            PurchasedParts = purchasedParts,
+            ServiceRecords = bookings.Select(booking => new CustomerServiceRecordDto
+            {
+                Id = booking.Id,
+                ServiceDate = booking.ServiceDate,
+                Description = booking.Description,
+                Status = booking.Status.ToString(),
+                VehiclePlate = vehiclePlateLookup.TryGetValue(booking.VehicleId, out var plate)
+                    ? plate
+                    : $"Vehicle #{booking.VehicleId}"
             }).ToList(),
             Invoices = invoices
                 .Where(invoice => invoice.CustomerId == id)
