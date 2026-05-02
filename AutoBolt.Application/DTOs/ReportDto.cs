@@ -26,3 +26,43 @@ public class TopPartDto
     public int QuantitySold { get; set; }
     public decimal TotalRevenue { get; set; }
 }
+
+public class StaffReportsDto
+{
+    public List<TopSpenderDto> TopSpenders { get; set; } = new();
+    public List<RegularCustomerDto> Regulars { get; set; } = new();
+    public List<PendingCreditDto> PendingCredits { get; set; } = new();
+}
+
+public class TopSpenderDto
+{
+    public int CustomerId { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string Phone { get; set; } = string.Empty;
+    public decimal TotalSpent { get; set; }
+    public int Orders { get; set; }
+}
+
+public class RegularCustomerDto
+{
+    public int CustomerId { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string Phone { get; set; } = string.Empty;
+    public int VisitCount { get; set; }
+    public int InvoiceCount { get; set; }
+    public int BookingCount { get; set; }
+}
+
+public class PendingCreditDto
+{
+    public int CustomerId { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string Phone { get; set; } = string.Empty;
+    public decimal CreditBalance { get; set; }
+    public decimal OutstandingAmount { get; set; }
+    public DateTime OldestPendingInvoiceDate { get; set; }
+    public int DaysOutstanding { get; set; }
+}

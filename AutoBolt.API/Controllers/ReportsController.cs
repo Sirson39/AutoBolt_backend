@@ -14,4 +14,11 @@ public class ReportsController(IReportService reportService) : ControllerBase
         var report = await reportService.GetSalesReportAsync(period.ToLower());
         return Ok(report);
     }
+
+    [HttpGet("staff")]
+    public async Task<ActionResult<StaffReportsDto>> GetStaffReports()
+    {
+        var report = await reportService.GetStaffReportsAsync();
+        return Ok(report);
+    }
 }
