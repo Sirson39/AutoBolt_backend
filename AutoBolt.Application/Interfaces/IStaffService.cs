@@ -10,4 +10,5 @@ public interface IStaffService
     Task<bool> UpdateStaffAsync(int id, CreateUserDto updateUserDto);
     Task<bool> DeleteStaffAsync(int id);
     Task<bool> ToggleStatusAsync(int id);
+    Task ResendCredentialsAsync(int staffId);
 }
