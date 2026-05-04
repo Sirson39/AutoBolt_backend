@@ -35,8 +35,15 @@ public class StaffController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserDto>> CreateStaff(CreateUserDto dto)
     {
-        var user = await _staffService.CreateStaffAsync(dto);
-        return CreatedAtAction(nameof(GetStaff), new { id = user.Id }, user);
+        try
+        {
+            var user = await _staffService.CreateStaffAsync(dto);
+            return CreatedAtAction(nameof(GetStaff), new { id = user.Id }, user);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
@@ -61,5 +68,19 @@ public class StaffController : ControllerBase
         var result = await _staffService.ToggleStatusAsync(id);
         if (!result) return NotFound();
         return NoContent();
+    }
+
+    [HttpPost("{id}/resend-credentials")]
+    public async Task<IActionResult> ResendCredentials(int id)
+    {
+        try
+        {
+            await _staffService.ResendCredentialsAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
 }
