@@ -58,8 +58,17 @@ public class StaffService : IStaffService
         var roleName = dto.Role.ToString();
         await _userManager.AddToRoleAsync(user, roleName);
 
-        // Email credentials to the new staff member
-        await _emailService.SendStaffCredentialsAsync(dto.Email, dto.FullName, dto.Password);
+        // Email credentials to the new staff member. Failures to send email should
+        // not break the staff creation flow — log and continue.
+        try
+        {
+            await _emailService.SendStaffCredentialsAsync(dto.Email, dto.FullName, dto.Password);
+        }
+        catch (Exception ex)
+        {
+            // Keep creation successful even if email fails. Prefer logging.
+            Console.WriteLine($"Warning: failed to send staff credentials email to {dto.Email}: {ex.Message}");
+        }
 
         return MapToDto(user, dto.Role);
     }
@@ -112,6 +121,60 @@ public class StaffService : IStaffService
         user.IsActive = !user.IsActive;
         var result = await _userManager.UpdateAsync(user);
         return result.Succeeded;
+    }
+
+    public async Task ResendCredentialsAsync(int staffId)
+    {
+        var user = await _userManager.FindByIdAsync(staffId.ToString());
+        if (user == null)
+            throw new InvalidOperationException("Staff member not found.");
+
+        var newPassword = GenerateSecurePassword();
+
+        var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Password reset failed: {errors}");
+        }
+
+        try
+        {
+            await _emailService.SendResendCredentialsAsync(user.Email!, user.FullName, newPassword);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: failed to send resend-credentials email to {user.Email}: {ex.Message}");
+        }
+    }
+
+    private static string GenerateSecurePassword()
+    {
+        const string digits = "23456789";
+        const string upper  = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const string lower  = "abcdefghjkmnpqrstuvwxyz";
+        const string all    = digits + upper + lower;
+
+        var bytes = new byte[12];
+        System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
+
+        var chars = new char[12];
+        chars[0] = digits[bytes[0] % digits.Length];
+        chars[1] = upper[bytes[1]  % upper.Length];
+        chars[2] = lower[bytes[2]  % lower.Length];
+        for (int i = 3; i < 12; i++)
+            chars[i] = all[bytes[i] % all.Length];
+
+        // Fisher-Yates shuffle so required chars are not always at positions 0-2
+        for (int i = 11; i > 0; i--)
+        {
+            int j = bytes[i % bytes.Length] % (i + 1);
+            (chars[i], chars[j]) = (chars[j], chars[i]);
+        }
+
+        return new string(chars);
     }
 
     private static UserDto MapToDto(ApplicationUser user, UserRole role)
