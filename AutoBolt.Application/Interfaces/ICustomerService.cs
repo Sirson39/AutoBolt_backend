@@ -7,6 +7,7 @@ public interface ICustomerService
     Task<IEnumerable<CustomerDto>> GetAllCustomersAsync();
     Task<CustomerDto?> GetCustomerByIdAsync(int id);
     Task<IEnumerable<CustomerDto>> SearchCustomersAsync(string query);
+    Task<IEnumerable<CustomerDto>> GetOverdueCreditCustomersAsync();
     Task<CustomerHistoryDto?> GetCustomerHistoryAsync(int id);
     Task<CustomerDto> CreateCustomerAsync(CustomerCreateUpdateDto dto);
     Task<CustomerRegistrationResultDto> RegisterCustomerWithVehicleAsync(CustomerRegistrationDto dto);

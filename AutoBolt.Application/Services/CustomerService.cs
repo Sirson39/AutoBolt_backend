@@ -65,6 +65,12 @@ public class CustomerService(
             .Select(MapToDto);
     }
 
+    public async Task<IEnumerable<CustomerDto>> GetOverdueCreditCustomersAsync()
+    {
+        var customers = await customerRepository.GetCustomersWithOverdueCreditsAsync();
+        return customers.Select(MapToDto);
+    }
+
     public async Task<CustomerHistoryDto?> GetCustomerHistoryAsync(int id)
     {
         var customer = await customerRepository.GetByIdAsync(id);

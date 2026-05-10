@@ -22,6 +22,13 @@ public class CustomersController(ICustomerService customerService) : ControllerB
         return Ok(customers);
     }
 
+    [HttpGet("overdue-credits")]
+    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetOverdueCredits()
+    {
+        var customers = await customerService.GetOverdueCreditCustomersAsync();
+        return Ok(customers);
+    }
+
     [HttpGet("{id}/history")]
     public async Task<ActionResult<CustomerHistoryDto>> GetHistory(int id)
     {
