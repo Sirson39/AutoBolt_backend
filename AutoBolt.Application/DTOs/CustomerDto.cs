@@ -41,6 +41,24 @@ public class CustomerSummaryDto
     public DateTime? LastServiceDate { get; set; }
 }
 
+public class CustomerTimelineDto
+{
+    public int CustomerId { get; set; }
+    public string FullName { get; set; } = null!;
+    public List<CustomerTimelineEventDto> Events { get; set; } = new();
+}
+
+public class CustomerTimelineEventDto
+{
+    public string EventType { get; set; } = null!;
+    public string Title { get; set; } = null!;
+    public string? Description { get; set; }
+    public DateTime OccurredAt { get; set; }
+    public decimal? Amount { get; set; }
+    public string? ReferenceNumber { get; set; }
+    public string? VehiclePlate { get; set; }
+}
+
 public class CustomerCreateUpdateDto
 {
     [Required(ErrorMessage = "Full Name is required.")]

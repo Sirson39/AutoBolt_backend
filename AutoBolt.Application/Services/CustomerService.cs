@@ -174,6 +174,60 @@ public class CustomerService(
             };
         }
 
+        public async Task<CustomerTimelineDto?> GetCustomerTimelineAsync(int id)
+        {
+            var customer = await customerRepository.GetByIdAsync(id);
+            if (customer == null)
+            {
+                return null;
+            }
+
+            var vehicles = await vehicleRepository.GetVehiclesByCustomerIdAsync(id);
+            var invoices = await invoiceRepository.GetAllWithDetailsAsync();
+            var bookings = await bookingRepository.GetBookingsByCustomerIdAsync(id);
+            var vehiclePlateLookup = vehicles.ToDictionary(vehicle => vehicle.Id, vehicle => vehicle.LicensePlate);
+
+            var events = new List<CustomerTimelineEventDto>();
+
+            foreach (var invoice in invoices.Where(invoice => invoice.CustomerId == id))
+            {
+                events.Add(new CustomerTimelineEventDto
+                {
+                    EventType = "Invoice",
+                    Title = $"Invoice {invoice.InvoiceNumber}",
+                    Description = $"Status: {invoice.Status}, Total: {invoice.TotalAmount:C}",
+                    OccurredAt = invoice.InvoiceDate,
+                    Amount = invoice.TotalAmount,
+                    ReferenceNumber = invoice.InvoiceNumber,
+                    VehiclePlate = invoice.Vehicle?.LicensePlate ?? "N/A"
+                });
+            }
+
+            foreach (var booking in bookings)
+            {
+                events.Add(new CustomerTimelineEventDto
+                {
+                    EventType = "Booking",
+                    Title = $"Service booking #{booking.Id}",
+                    Description = booking.Description,
+                    OccurredAt = booking.ServiceDate,
+                    ReferenceNumber = booking.Id.ToString(),
+                    VehiclePlate = vehiclePlateLookup.TryGetValue(booking.VehicleId, out var plate)
+                        ? plate
+                        : $"Vehicle #{booking.VehicleId}"
+                });
+            }
+
+            return new CustomerTimelineDto
+            {
+                CustomerId = customer.Id,
+                FullName = customer.FullName,
+                Events = events
+                    .OrderByDescending(activity => activity.OccurredAt)
+                    .ToList()
+            };
+        }
+
     public async Task<CustomerDto> CreateCustomerAsync(CustomerCreateUpdateDto dto)
     {
         var customer = new Customer

@@ -47,6 +47,14 @@ public class CustomersController(ICustomerService customerService) : ControllerB
         return Ok(summary);
     }
 
+    [HttpGet("{id}/timeline")]
+    public async Task<ActionResult<CustomerTimelineDto>> GetTimeline(int id)
+    {
+        var timeline = await customerService.GetCustomerTimelineAsync(id);
+        if (timeline == null) return NotFound();
+        return Ok(timeline);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<CustomerDto>> GetById(int id)
     {
