@@ -216,6 +216,38 @@ public class CustomerService(
         };
     }
 
+    public async Task<CustomerCreditPaymentResultDto> ApplyCreditPaymentAsync(int id, CustomerCreditPaymentDto dto)
+    {
+        var customer = await customerRepository.GetByIdAsync(id);
+        if (customer == null)
+        {
+            throw new ArgumentException($"Customer with ID {id} not found.");
+        }
+
+        if (dto.Amount <= 0)
+        {
+            throw new ArgumentException("Payment amount must be greater than zero.");
+        }
+
+        if (dto.Amount > customer.CreditBalance)
+        {
+            throw new ArgumentException("Payment amount cannot exceed the current credit balance.");
+        }
+
+        customer.CreditBalance -= dto.Amount;
+        customer.UpdatedAt = DateTime.UtcNow;
+
+        customerRepository.Update(customer);
+        await customerRepository.SaveChangesAsync();
+
+        return new CustomerCreditPaymentResultDto
+        {
+            Customer = MapToDto(customer),
+            AmountPaid = dto.Amount,
+            RemainingBalance = customer.CreditBalance
+        };
+    }
+
     public async Task UpdateCustomerAsync(int id, CustomerCreateUpdateDto dto)
     {
         var customer = await customerRepository.GetByIdAsync(id);

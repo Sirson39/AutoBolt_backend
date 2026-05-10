@@ -68,6 +68,20 @@ public class CustomersController(ICustomerService customerService) : ControllerB
         }
     }
 
+    [HttpPost("{id}/credit-payment")]
+    public async Task<ActionResult<CustomerCreditPaymentResultDto>> ApplyCreditPayment(int id, CustomerCreditPaymentDto dto)
+    {
+        try
+        {
+            var result = await customerService.ApplyCreditPaymentAsync(id, dto);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, CustomerCreateUpdateDto dto)
     {

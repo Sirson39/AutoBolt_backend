@@ -11,6 +11,7 @@ public interface ICustomerService
     Task<CustomerHistoryDto?> GetCustomerHistoryAsync(int id);
     Task<CustomerDto> CreateCustomerAsync(CustomerCreateUpdateDto dto);
     Task<CustomerRegistrationResultDto> RegisterCustomerWithVehicleAsync(CustomerRegistrationDto dto);
+    Task<CustomerCreditPaymentResultDto> ApplyCreditPaymentAsync(int id, CustomerCreditPaymentDto dto);
     Task UpdateCustomerAsync(int id, CustomerCreateUpdateDto dto);
     Task DeleteCustomerAsync(int id);
 }

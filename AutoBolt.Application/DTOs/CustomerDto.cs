@@ -12,6 +12,19 @@ public class CustomerDto
     public decimal CreditBalance { get; set; }
 }
 
+public class CustomerCreditPaymentDto
+{
+    [Range(0.01, double.MaxValue, ErrorMessage = "Payment amount must be greater than zero.")]
+    public decimal Amount { get; set; }
+}
+
+public class CustomerCreditPaymentResultDto
+{
+    public CustomerDto Customer { get; set; } = new();
+    public decimal AmountPaid { get; set; }
+    public decimal RemainingBalance { get; set; }
+}
+
 public class CustomerCreateUpdateDto
 {
     [Required(ErrorMessage = "Full Name is required.")]
