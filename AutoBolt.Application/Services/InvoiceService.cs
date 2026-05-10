@@ -9,7 +9,8 @@ public class InvoiceService(
     IInvoiceRepository invoiceRepository,
     IGenericRepository<Part> partRepository,
     IGenericRepository<Customer> customerRepository,
-    IGenericRepository<Vehicle> vehicleRepository) : IInvoiceService
+    IGenericRepository<Vehicle> vehicleRepository,
+    IEmailService emailService) : IInvoiceService
 {
     public async Task<IEnumerable<InvoiceDto>> GetAllInvoicesAsync()
     {
@@ -25,6 +26,17 @@ public class InvoiceService(
 
     public async Task<InvoiceDto> CreateInvoiceAsync(InvoiceCreateDto dto)
     {
+        var customerExists = await customerRepository.GetByIdAsync(dto.CustomerId) != null;
+        if (!customerExists)
+            throw new Exception($"Customer with ID {dto.CustomerId} not found.");
+
+        if (dto.VehicleId.HasValue)
+        {
+            var vehicleExists = await vehicleRepository.GetByIdAsync(dto.VehicleId.Value) != null;
+            if (!vehicleExists)
+                throw new Exception($"Vehicle with ID {dto.VehicleId.Value} not found.");
+        }
+
         var invoice = new Invoice
         {
             InvoiceNumber = $"INV-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}",
@@ -70,7 +82,9 @@ public class InvoiceService(
             invoice.DiscountAmount = 0;
         }
 
-        invoice.TotalAmount = invoice.SubTotal - invoice.DiscountAmount;
+        var taxRate = dto.TaxRate < 0 ? 0m : dto.TaxRate;
+        var taxAmount = (invoice.SubTotal - invoice.DiscountAmount) * taxRate;
+        invoice.TotalAmount = invoice.SubTotal - invoice.DiscountAmount + taxAmount;
 
         await invoiceRepository.AddAsync(invoice);
         await invoiceRepository.SaveChangesAsync();
@@ -90,6 +104,23 @@ public class InvoiceService(
         return true;
     }
 
+    public async Task<bool> EmailInvoiceAsync(int id, string? recipientEmail = null)
+    {
+        var invoice = await invoiceRepository.GetByIdWithDetailsAsync(id);
+        if (invoice == null)
+            return false;
+
+        var emailToSend = recipientEmail;
+        if (string.IsNullOrWhiteSpace(emailToSend))
+            emailToSend = invoice.Customer?.Email;
+
+        if (string.IsNullOrWhiteSpace(emailToSend))
+            throw new Exception("Customer email is missing. Provide a recipient email or update the customer record.");
+
+        await emailService.SendInvoiceEmailAsync(emailToSend, MapToDto(invoice));
+        return true;
+    }
+
     private static InvoiceDto MapToDto(Invoice invoice)
     {
         return new InvoiceDto
@@ -101,6 +132,7 @@ public class InvoiceService(
             VehiclePlate = invoice.Vehicle?.LicensePlate ?? "N/A",
             SubTotal = invoice.SubTotal,
             DiscountAmount = invoice.DiscountAmount,
+            TaxAmount = Math.Max(invoice.TotalAmount - invoice.SubTotal + invoice.DiscountAmount, 0m),
             TotalAmount = invoice.TotalAmount,
             Status = invoice.Status.ToString(),
             Items = invoice.Items.Select(ii => new InvoiceItemDto

@@ -1,3 +1,4 @@
+using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
 using AutoBolt.Infrastructure.Settings;
 using MailKit.Net.Smtp;
@@ -91,6 +92,49 @@ public class EmailService : IEmailService
                     </div>
                     <p style='color: #ef4444;'>Please log in and change your password immediately.</p>
                     <p>Login at: <a href='http://localhost:5173'>AutoBolt Portal</a></p>
+                    <hr/>
+                    <p style='color: #6b7280; font-size: 12px;'>AutoBolt Vehicle Parts &amp; Service Management</p>
+                </div>"
+        };
+
+        await SendCoreAsync(message);
+    }
+
+    public async Task SendInvoiceEmailAsync(string recipientEmail, InvoiceDto invoice)
+    {
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(_settings.SenderName, _settings.SenderEmail));
+        message.To.Add(new MailboxAddress(recipientEmail, recipientEmail));
+        message.Subject = $"AutoBolt — Invoice {invoice.InvoiceNumber}";
+
+        var itemRows = string.Join("", invoice.Items.Select(item =>
+            $"<tr><td style='padding:8px;border-bottom:1px solid #eee;'>{item.PartName}</td>" +
+            $"<td style='padding:8px;border-bottom:1px solid #eee;text-align:center;'>{item.Quantity}</td>" +
+            $"<td style='padding:8px;border-bottom:1px solid #eee;text-align:right;'>Rs {item.SubTotal:N0}</td></tr>"));
+
+        message.Body = new TextPart("html")
+        {
+            Text = $@"
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2 style='color: #d95d39;'>AutoBolt</h2>
+                    <p>Dear {invoice.CustomerName},</p>
+                    <p>Please find your invoice details below.</p>
+                    <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+                        <thead>
+                            <tr style='border-bottom:2px solid #000;'>
+                                <th style='text-align:left;padding:8px;'>Item</th>
+                                <th style='text-align:center;padding:8px;'>Qty</th>
+                                <th style='text-align:right;padding:8px;'>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>{itemRows}</tbody>
+                    </table>
+                    <div style='text-align:right;'>
+                        <p>Subtotal: Rs {invoice.SubTotal:N0}</p>
+                        {(invoice.DiscountAmount > 0 ? $"<p>Discount: -Rs {invoice.DiscountAmount:N0}</p>" : "")}
+                        <p><strong>Total: Rs {invoice.TotalAmount:N0}</strong></p>
+                    </div>
+                    <p>Invoice #: {invoice.InvoiceNumber} | Date: {invoice.InvoiceDate:dd MMM yyyy}</p>
                     <hr/>
                     <p style='color: #6b7280; font-size: 12px;'>AutoBolt Vehicle Parts &amp; Service Management</p>
                 </div>"

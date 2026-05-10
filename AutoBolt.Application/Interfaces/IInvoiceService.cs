@@ -8,4 +8,5 @@ public interface IInvoiceService
     Task<InvoiceDto?> GetInvoiceByIdAsync(int id);
     Task<InvoiceDto> CreateInvoiceAsync(InvoiceCreateDto dto);
     Task<bool> CancelInvoiceAsync(int id);
+    Task<bool> EmailInvoiceAsync(int id, string? recipientEmail = null);
 }

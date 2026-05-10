@@ -16,4 +16,13 @@ public class BookingRepository(AutoBoltDbContext context) : GenericRepository<Bo
             .Include(b => b.Vehicle)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<Booking>> GetBookingsByCustomerIdAsync(int customerId)
+    {
+        return await _dbSet
+            .Where(b => b.CustomerId == customerId)
+            .Include(b => b.Vehicle)
+            .OrderByDescending(b => b.ServiceDate)
+            .ToListAsync();
+    }
 }

@@ -24,6 +24,14 @@ public class CustomersController(ICustomerService customerService) : ControllerB
         return Ok(customers);
     }
 
+    [HttpGet("{id}/history")]
+    public async Task<ActionResult<CustomerHistoryDto>> GetHistory(int id)
+    {
+        var history = await customerService.GetCustomerHistoryAsync(id);
+        if (history == null) return NotFound();
+        return Ok(history);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<CustomerDto>> GetById(int id)
     {
@@ -37,6 +45,20 @@ public class CustomersController(ICustomerService customerService) : ControllerB
     {
         var createdCustomer = await customerService.CreateCustomerAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = createdCustomer.Id }, createdCustomer);
+    }
+
+    [HttpPost("register")]
+    public async Task<ActionResult<CustomerRegistrationResultDto>> Register(CustomerRegistrationDto dto)
+    {
+        try
+        {
+            var result = await customerService.RegisterCustomerWithVehicleAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = result.Customer.Id }, result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
