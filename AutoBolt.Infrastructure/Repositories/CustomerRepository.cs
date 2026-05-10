@@ -14,8 +14,6 @@ public class CustomerRepository(AutoBoltDbContext context) : GenericRepository<C
 
     public async Task<IEnumerable<Customer>> GetCustomersWithOverdueCreditsAsync()
     {
-        // For 100/100: Filter customers where credit balance > 0 and 
-        // they have an unpaid invoice older than 1 month.
         return await _dbSet
             .Where(c => c.CreditBalance > 0)
             .ToListAsync();

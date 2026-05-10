@@ -9,6 +9,5 @@ public class Vendor : BaseEntity
     public string? Address { get; set; }
     public string? LogoUrl { get; set; }
     
-    // Navigation property for parts supplied by this vendor (optional)
     public ICollection<Part> SuppliedParts { get; set; } = new List<Part>();
 }

@@ -8,9 +8,9 @@ public class Vehicle : BaseEntity
     public required string Make { get; set; }
     public required string Model { get; set; }
     public int Year { get; set; }
-    public string? VIN { get; set; } // Vehicle Identification Number
-    public double Mileage { get; set; } // Current mileage for AI prediction
-    public PlateType PlateType { get; set; } // Categorization for UI styling
+    public string? VIN { get; set; }
+    public double Mileage { get; set; }
+    public PlateType PlateType { get; set; }
     
     public int CustomerId { get; set; }
     public Customer? Owner { get; set; }

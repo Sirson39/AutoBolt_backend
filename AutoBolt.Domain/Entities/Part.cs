@@ -10,8 +10,5 @@ public class Part : BaseEntity
     public int StockQuantity { get; set; }
     public PartCategory Category { get; set; }
     public string? ImageUrl { get; set; }
-    
-    // Low stock threshold logic will be in Application layer, 
-    // but we can mark it here if needed.
     public bool IsLowStock => StockQuantity < 10;
 }

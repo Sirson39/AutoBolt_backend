@@ -87,7 +87,6 @@ namespace AutoBolt.Infrastructure.Services
                 var purchaseInvoice = new PurchaseInvoice
                 {
                     VendorId = dto.VendorId,
-                    // Auto-generate invoice number like Sales
                     InvoiceNumber = $"PUR-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}",
                     // Ensure UTC for Postgres
                     PurchaseDate = DateTime.SpecifyKind(dto.PurchaseDate, DateTimeKind.Utc),
@@ -114,7 +113,6 @@ namespace AutoBolt.Infrastructure.Services
                         CreatedAt = DateTime.UtcNow
                     });
 
-                    // Update stock quantity
                     part.StockQuantity += itemDto.Quantity;
                 }
 
@@ -129,7 +127,6 @@ namespace AutoBolt.Infrastructure.Services
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                // Log or throw specific message
                 throw new Exception($"Failed to save purchase: {ex.Message} {ex.InnerException?.Message}");
             }
         }
@@ -145,8 +142,6 @@ namespace AutoBolt.Infrastructure.Services
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Optionally: Rollback stock when deleting an invoice? 
-                // Usually, we don't delete invoices, but if we do, we should handle stock.
                 foreach (var item in invoice.Items)
                 {
                     var part = await _context.Parts.FindAsync(item.PartId);

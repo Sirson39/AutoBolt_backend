@@ -29,7 +29,7 @@ public class InvoiceCreateDto
 {
     public int CustomerId { get; set; }
     public int? VehicleId { get; set; }
-    public int Status { get; set; } // Add this
+    public int Status { get; set; }
     public List<InvoiceItemCreateDto> Items { get; set; } = new();
 }
 

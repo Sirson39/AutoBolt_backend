@@ -55,14 +55,12 @@ public class InvoiceService(
                 SubTotal = itemSubTotal
             });
 
-            // REDUCE STOCK
             part.StockQuantity -= itemDto.Quantity;
             partRepository.Update(part);
         }
 
         invoice.SubTotal = subTotal;
 
-        // LOYALTY PROGRAM: 10% discount if spend > 5000
         if (subTotal > 5000)
         {
             invoice.DiscountAmount = subTotal * 0.10m;
@@ -87,10 +85,6 @@ public class InvoiceService(
         if (invoice == null || invoice.Status == InvoiceStatus.Cancelled) return false;
 
         invoice.Status = InvoiceStatus.Cancelled;
-        
-        // Logic to restock items if cancelled
-        // (Optional for now, but good practice)
-        
         invoiceRepository.Update(invoice);
         await invoiceRepository.SaveChangesAsync();
         return true;

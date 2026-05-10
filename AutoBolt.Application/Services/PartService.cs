@@ -47,7 +47,7 @@ public class PartService(IPartRepository partRepository) : IPartService
         part.Price = dto.Price;
         part.StockQuantity = dto.StockQuantity;
         part.Category = (PartCategory)dto.CategoryId;
-        part.ImageUrl = dto.ImageUrl ?? part.ImageUrl; // Keep existing if not updated
+        part.ImageUrl = dto.ImageUrl ?? part.ImageUrl;
         part.UpdatedAt = DateTime.UtcNow;
 
         partRepository.Update(part);

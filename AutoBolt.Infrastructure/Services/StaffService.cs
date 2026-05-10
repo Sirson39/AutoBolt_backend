@@ -66,7 +66,6 @@ public class StaffService : IStaffService
         }
         catch (Exception ex)
         {
-            // Keep creation successful even if email fails. Prefer logging.
             Console.WriteLine($"Warning: failed to send staff credentials email to {dto.Email}: {ex.Message}");
         }
 
@@ -92,7 +91,6 @@ public class StaffService : IStaffService
             await _userManager.ResetPasswordAsync(user, token, dto.Password);
         }
 
-        // Update role if changed
         var currentRoles = await _userManager.GetRolesAsync(user);
         var newRole = dto.Role.ToString();
         if (!currentRoles.Contains(newRole))

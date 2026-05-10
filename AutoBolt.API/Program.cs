@@ -11,11 +11,9 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
-// Register Clean Architecture layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -29,7 +27,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Seed roles and default admin on startup
 using (var scope = app.Services.CreateScope())
 {
     await SeedRolesAndAdminAsync(scope.ServiceProvider);
@@ -61,14 +58,12 @@ static async Task SeedRolesAndAdminAsync(IServiceProvider services)
 
     await db.Database.MigrateAsync();
 
-    // Ensure all roles exist
     foreach (var role in new[] { "Admin", "Staff", "Customer" })
     {
         if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole<int>(role));
     }
 
-    // Seed default admin if not exists
     const string adminEmail = "admin@autobolt.com";
     if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
