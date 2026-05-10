@@ -39,6 +39,14 @@ public class CustomersController(ICustomerService customerService) : ControllerB
         return Ok(history);
     }
 
+    [HttpGet("{id}/summary")]
+    public async Task<ActionResult<CustomerSummaryDto>> GetSummary(int id)
+    {
+        var summary = await customerService.GetCustomerSummaryAsync(id);
+        if (summary == null) return NotFound();
+        return Ok(summary);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<CustomerDto>> GetById(int id)
     {

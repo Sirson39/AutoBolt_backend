@@ -144,6 +144,36 @@ public class CustomerService(
         };
     }
 
+        public async Task<CustomerSummaryDto?> GetCustomerSummaryAsync(int id)
+        {
+            var customer = await customerRepository.GetByIdAsync(id);
+            if (customer == null)
+            {
+                return null;
+            }
+
+            var vehicles = await vehicleRepository.GetVehiclesByCustomerIdAsync(id);
+            var invoices = await invoiceRepository.GetAllWithDetailsAsync();
+            var bookings = await bookingRepository.GetBookingsByCustomerIdAsync(id);
+            var customerInvoices = invoices.Where(invoice => invoice.CustomerId == id).ToList();
+
+            return new CustomerSummaryDto
+            {
+                CustomerId = customer.Id,
+                FullName = customer.FullName,
+                Email = customer.Email,
+                Phone = customer.Phone,
+                CreditBalance = customer.CreditBalance,
+                VehicleCount = vehicles.Count(),
+                InvoiceCount = customerInvoices.Count,
+                BookingCount = bookings.Count(),
+                TotalSpent = customerInvoices.Where(invoice => invoice.Status == InvoiceStatus.Paid).Sum(invoice => invoice.TotalAmount),
+                OutstandingAmount = customerInvoices.Where(invoice => invoice.Status != InvoiceStatus.Paid && invoice.Status != InvoiceStatus.Cancelled).Sum(invoice => invoice.TotalAmount),
+                LastInvoiceDate = customerInvoices.OrderByDescending(invoice => invoice.InvoiceDate).Select(invoice => (DateTime?)invoice.InvoiceDate).FirstOrDefault(),
+                LastServiceDate = bookings.OrderByDescending(booking => booking.ServiceDate).Select(booking => (DateTime?)booking.ServiceDate).FirstOrDefault()
+            };
+        }
+
     public async Task<CustomerDto> CreateCustomerAsync(CustomerCreateUpdateDto dto)
     {
         var customer = new Customer

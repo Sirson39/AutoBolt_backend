@@ -25,6 +25,22 @@ public class CustomerCreditPaymentResultDto
     public decimal RemainingBalance { get; set; }
 }
 
+public class CustomerSummaryDto
+{
+    public int CustomerId { get; set; }
+    public string FullName { get; set; } = null!;
+    public string? Email { get; set; }
+    public string Phone { get; set; } = null!;
+    public decimal CreditBalance { get; set; }
+    public int VehicleCount { get; set; }
+    public int InvoiceCount { get; set; }
+    public int BookingCount { get; set; }
+    public decimal TotalSpent { get; set; }
+    public decimal OutstandingAmount { get; set; }
+    public DateTime? LastInvoiceDate { get; set; }
+    public DateTime? LastServiceDate { get; set; }
+}
+
 public class CustomerCreateUpdateDto
 {
     [Required(ErrorMessage = "Full Name is required.")]
