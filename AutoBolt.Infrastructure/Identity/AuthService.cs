@@ -122,7 +122,20 @@ public class AuthService : IAuthService
 
         try
         {
-            await _emailService.SendPasswordResetEmailAsync(user.Email!, user.FullName, token);
+            await _emailService.SendEmailAsync(user.Email!, "AutoBolt — Password Reset Request", $@"
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2 style='color: #2563eb;'>Password Reset Request</h2>
+                    <p>Hi {user.FullName},</p>
+                    <p>We received a request to reset your AutoBolt account password.
+                       Use the token below with the reset-password form. This token expires shortly.</p>
+                    <div style='background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0; word-break: break-all;'>
+                        <p style='margin: 0;'><strong>Reset Token:</strong></p>
+                        <p style='font-family: monospace; color: #1d4ed8; margin: 8px 0 0 0;'>{token}</p>
+                    </div>
+                    <p style='color: #ef4444;'>If you did not request a password reset, you can safely ignore this email.</p>
+                    <hr/>
+                    <p style='color: #6b7280; font-size: 12px;'>AutoBolt Vehicle Parts &amp; Service Management</p>
+                </div>");
         }
         catch (Exception ex)
         {

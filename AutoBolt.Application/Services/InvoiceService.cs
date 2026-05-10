@@ -1,4 +1,4 @@
-using AutoBolt.Application.DTOs;
+﻿using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
 using AutoBolt.Domain.Entities;
 using AutoBolt.Domain.Enums;
@@ -10,7 +10,8 @@ public class InvoiceService(
     IGenericRepository<Part> partRepository,
     IGenericRepository<Customer> customerRepository,
     IGenericRepository<Vehicle> vehicleRepository,
-    IEmailService emailService) : IInvoiceService
+    IEmailService emailService,
+    IShopService shopService) : IInvoiceService
 {
     public async Task<IEnumerable<InvoiceDto>> GetAllInvoicesAsync()
     {
@@ -73,9 +74,11 @@ public class InvoiceService(
 
         invoice.SubTotal = subTotal;
 
-        if (subTotal > 5000)
+        // LOYALTY PROGRAM: Dynamic check from DB
+        var shopConfig = await shopService.GetConfigurationAsync();
+        if (subTotal >= shopConfig.LoyaltyThreshold)
         {
-            invoice.DiscountAmount = subTotal * 0.10m;
+            invoice.DiscountAmount = subTotal * (shopConfig.LoyaltyDiscountPercent / 100m);
         }
         else
         {
@@ -128,6 +131,7 @@ public class InvoiceService(
             Id = invoice.Id,
             InvoiceNumber = invoice.InvoiceNumber,
             InvoiceDate = invoice.InvoiceDate,
+            CustomerId = invoice.CustomerId,
             CustomerName = invoice.Customer?.FullName ?? $"Customer #{invoice.CustomerId}",
             VehiclePlate = invoice.Vehicle?.LicensePlate ?? "N/A",
             SubTotal = invoice.SubTotal,
@@ -146,3 +150,4 @@ public class InvoiceService(
         };
     }
 }
+

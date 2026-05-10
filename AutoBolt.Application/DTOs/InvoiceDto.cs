@@ -7,6 +7,7 @@ public class InvoiceDto
     public int Id { get; set; }
     public string InvoiceNumber { get; set; } = null!;
     public DateTime InvoiceDate { get; set; }
+    public int CustomerId { get; set; }
     public string CustomerName { get; set; } = null!;
     public string? VehiclePlate { get; set; }
     public decimal SubTotal { get; set; }

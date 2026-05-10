@@ -1,4 +1,4 @@
-using AutoBolt.Application.DTOs;
+﻿using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -83,4 +83,14 @@ public class StaffController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+
+    [HttpPost("confirm-setup")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ConfirmSetup(ConfirmSetupDto dto)
+    {
+        var result = await _staffService.ConfirmAndSetupStaffAsync(dto.UserId, dto.Token, dto.NewPassword);
+        if (!result) return BadRequest("Invalid or expired verification link.");
+        return Ok(new { message = "Account activated successfully." });
+    }
 }
+

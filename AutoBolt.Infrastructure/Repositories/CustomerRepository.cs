@@ -1,5 +1,6 @@
 using AutoBolt.Application.Interfaces;
 using AutoBolt.Domain.Entities;
+using AutoBolt.Domain.Enums;
 using AutoBolt.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +16,12 @@ public class CustomerRepository(AutoBoltDbContext context) : GenericRepository<C
     public async Task<IEnumerable<Customer>> GetCustomersWithOverdueCreditsAsync()
     {
         return await _dbSet
-            .Where(c => c.CreditBalance > 0)
+            .Where(customer => customer.CreditBalance > 0)
+            .Where(customer => _context.Invoices.Any(invoice =>
+                invoice.CustomerId == customer.Id &&
+                invoice.Status != InvoiceStatus.Paid &&
+                invoice.Status != InvoiceStatus.Cancelled &&
+                invoice.InvoiceDate <= DateTime.UtcNow.AddMonths(-1)))
             .ToListAsync();
     }
 }
