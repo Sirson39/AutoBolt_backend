@@ -3,6 +3,7 @@ using System;
 using AutoBolt.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoBolt.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AutoBoltDbContext))]
-    partial class AutoBoltDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260429095954_AddIdentityTables")]
+    partial class AddIdentityTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -313,39 +316,6 @@ namespace AutoBolt.Infrastructure.Data.Migrations
 
                     b.ToTable("PurchaseInvoiceItems");
                 });
-
-
-            modelBuilder.Entity("AutoBolt.Domain.Entities.ShopConfiguration", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("LoyaltyDiscountPercent")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("LoyaltyThreshold")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("ShopName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Tagline")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ShopConfigurations");
-                });
-
 
             modelBuilder.Entity("AutoBolt.Domain.Entities.Vehicle", b =>
                 {

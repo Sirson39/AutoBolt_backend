@@ -1,11 +1,12 @@
 using AutoBolt.Domain.Entities;
+using AutoBolt.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoBolt.Infrastructure.Data;
 
-public class AutoBoltDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+public class AutoBoltDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
     public AutoBoltDbContext(DbContextOptions<AutoBoltDbContext> options) : base(options)
     {
@@ -26,8 +27,6 @@ public class AutoBoltDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configure relationships and constraints
-        
         modelBuilder.Entity<InvoiceItem>()
             .HasOne(ii => ii.Invoice)
             .WithMany(i => i.Items)
@@ -47,46 +46,17 @@ public class AutoBoltDbContext : IdentityDbContext<User, IdentityRole<int>, int>
             .HasOne(b => b.Customer)
             .WithMany(c => c.Bookings)
             .HasForeignKey(b => b.CustomerId);
-            
-        // Decimal precision configurations
-        modelBuilder.Entity<Part>()
-            .Property(p => p.Price)
-            .HasPrecision(18, 2);
 
-        modelBuilder.Entity<Customer>()
-            .Property(c => c.CreditBalance)
-            .HasPrecision(18, 2);
-
-        modelBuilder.Entity<Invoice>()
-            .Property(i => i.SubTotal)
-            .HasPrecision(18, 2);
-
-        modelBuilder.Entity<Invoice>()
-            .Property(i => i.DiscountAmount)
-            .HasPrecision(18, 2);
-
-        modelBuilder.Entity<Invoice>()
-            .Property(i => i.TotalAmount)
-            .HasPrecision(18, 2);
-
-        modelBuilder.Entity<InvoiceItem>()
-            .Property(ii => ii.UnitPrice)
-            .HasPrecision(18, 2);
-
-        modelBuilder.Entity<InvoiceItem>()
-            .Property(ii => ii.SubTotal)
-            .HasPrecision(18, 2);
-
-        modelBuilder.Entity<PurchaseInvoice>()
-            .Property(pi => pi.TotalAmount)
-            .HasPrecision(18, 2);
-
-        modelBuilder.Entity<PurchaseInvoiceItem>()
-            .Property(pii => pii.UnitCost)
-            .HasPrecision(18, 2);
-
-        modelBuilder.Entity<PurchaseInvoiceItem>()
-            .Property(pii => pii.Subtotal)
-            .HasPrecision(18, 2);
+        // Decimal precision
+        modelBuilder.Entity<Part>().Property(p => p.Price).HasPrecision(18, 2);
+        modelBuilder.Entity<Customer>().Property(c => c.CreditBalance).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.SubTotal).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.DiscountAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.TotalAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<InvoiceItem>().Property(ii => ii.UnitPrice).HasPrecision(18, 2);
+        modelBuilder.Entity<InvoiceItem>().Property(ii => ii.SubTotal).HasPrecision(18, 2);
+        modelBuilder.Entity<PurchaseInvoice>().Property(pi => pi.TotalAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<PurchaseInvoiceItem>().Property(pii => pii.UnitCost).HasPrecision(18, 2);
+        modelBuilder.Entity<PurchaseInvoiceItem>().Property(pii => pii.Subtotal).HasPrecision(18, 2);
     }
 }

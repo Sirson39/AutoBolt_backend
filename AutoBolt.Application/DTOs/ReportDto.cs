@@ -15,14 +15,14 @@ public class SalesReportDto
 
 public class RevenuePointDto
 {
-    public string Label { get; set; } // "2026-04-25", "April", "2026"
+    public string Label { get; set; } = string.Empty;
     public decimal Revenue { get; set; }
     public int OrderCount { get; set; }
 }
 
 public class TopPartDto
 {
-    public string PartName { get; set; }
+    public string PartName { get; set; } = string.Empty;
     public int QuantitySold { get; set; }
     public decimal TotalRevenue { get; set; }
 }

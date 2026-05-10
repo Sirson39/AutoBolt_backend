@@ -31,7 +31,7 @@ public class InvoiceCreateDto
 {
     public int CustomerId { get; set; }
     public int? VehicleId { get; set; }
-    public int Status { get; set; } // Add this
+    public int Status { get; set; }
     public decimal TaxRate { get; set; } = 0.13m;
     public List<InvoiceItemCreateDto> Items { get; set; } = new();
 }

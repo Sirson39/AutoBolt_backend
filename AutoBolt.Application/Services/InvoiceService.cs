@@ -1,4 +1,4 @@
-using AutoBolt.Application.DTOs;
+﻿using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
 using AutoBolt.Domain.Entities;
 using AutoBolt.Domain.Enums;
@@ -68,7 +68,6 @@ public class InvoiceService(
                 SubTotal = itemSubTotal
             });
 
-            // REDUCE STOCK
             part.StockQuantity -= itemDto.Quantity;
             partRepository.Update(part);
         }
@@ -103,10 +102,6 @@ public class InvoiceService(
         if (invoice == null || invoice.Status == InvoiceStatus.Cancelled) return false;
 
         invoice.Status = InvoiceStatus.Cancelled;
-        
-        // Logic to restock items if cancelled
-        // (Optional for now, but good practice)
-        
         invoiceRepository.Update(invoice);
         await invoiceRepository.SaveChangesAsync();
         return true;
@@ -116,20 +111,14 @@ public class InvoiceService(
     {
         var invoice = await invoiceRepository.GetByIdWithDetailsAsync(id);
         if (invoice == null)
-        {
             return false;
-        }
 
         var emailToSend = recipientEmail;
         if (string.IsNullOrWhiteSpace(emailToSend))
-        {
             emailToSend = invoice.Customer?.Email;
-        }
 
         if (string.IsNullOrWhiteSpace(emailToSend))
-        {
             throw new Exception("Customer email is missing. Provide a recipient email or update the customer record.");
-        }
 
         await emailService.SendInvoiceEmailAsync(emailToSend, MapToDto(invoice));
         return true;
@@ -161,3 +150,4 @@ public class InvoiceService(
         };
     }
 }
+

@@ -1,12 +1,14 @@
 using AutoBolt.API.DTOs;
 using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBolt.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class VendorsController(IVendorService vendorService, IWebHostEnvironment env) : ControllerBase
 {
     [HttpGet]

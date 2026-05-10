@@ -26,7 +26,6 @@ public class VehicleService(IVehicleRepository vehicleRepository, ICustomerRepos
 
     public async Task<VehicleDto> CreateVehicleAsync(VehicleCreateUpdateDto dto)
     {
-        // Optional: verify the customer exists before creation.
         var customerExists = await customerRepository.GetByIdAsync(dto.CustomerId) != null;
         if (!customerExists)
             throw new ArgumentException($"Customer with ID {dto.CustomerId} does not exist.");

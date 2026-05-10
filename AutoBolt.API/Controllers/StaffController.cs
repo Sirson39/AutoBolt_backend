@@ -1,11 +1,13 @@
-using AutoBolt.Application.DTOs;
+﻿using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBolt.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class StaffController : ControllerBase
 {
     private readonly IStaffService _staffService;
@@ -33,8 +35,15 @@ public class StaffController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserDto>> CreateStaff(CreateUserDto dto)
     {
-        var user = await _staffService.CreateStaffAsync(dto);
-        return CreatedAtAction(nameof(GetStaff), new { id = user.Id }, user);
+        try
+        {
+            var user = await _staffService.CreateStaffAsync(dto);
+            return CreatedAtAction(nameof(GetStaff), new { id = user.Id }, user);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
@@ -61,7 +70,22 @@ public class StaffController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id}/resend-credentials")]
+    public async Task<IActionResult> ResendCredentials(int id)
+    {
+        try
+        {
+            await _staffService.ResendCredentialsAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
     [HttpPost("confirm-setup")]
+    [AllowAnonymous]
     public async Task<IActionResult> ConfirmSetup(ConfirmSetupDto dto)
     {
         var result = await _staffService.ConfirmAndSetupStaffAsync(dto.UserId, dto.Token, dto.NewPassword);
@@ -69,3 +93,4 @@ public class StaffController : ControllerBase
         return Ok(new { message = "Account activated successfully." });
     }
 }
+

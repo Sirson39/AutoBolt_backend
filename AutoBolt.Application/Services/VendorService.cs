@@ -46,8 +46,6 @@ public class VendorService(IVendorRepository vendorRepository) : IVendorService
         vendor.Email = dto.Email;
         vendor.Phone = dto.Phone;
         vendor.Address = dto.Address;
-        
-        // Only update logo if a new one was provided, otherwise keep existing
         if (dto.LogoUrl != null)
         {
             vendor.LogoUrl = dto.LogoUrl;

@@ -1,11 +1,13 @@
 using AutoBolt.Application.DTOs;
 using AutoBolt.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBolt.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Staff")]
 public class InvoicesController(IInvoiceService invoiceService) : ControllerBase
 {
     [HttpGet]
@@ -26,7 +28,7 @@ public class InvoicesController(IInvoiceService invoiceService) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<InvoiceDto>> Create(InvoiceCreateDto dto)
     {
-        try 
+        try
         {
             var createdInvoice = await invoiceService.CreateInvoiceAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = createdInvoice.Id }, createdInvoice);
