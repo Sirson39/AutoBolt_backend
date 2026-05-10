@@ -60,4 +60,12 @@ public class StaffController : ControllerBase
         if (!result) return NotFound();
         return NoContent();
     }
+
+    [HttpPost("confirm-setup")]
+    public async Task<IActionResult> ConfirmSetup(ConfirmSetupDto dto)
+    {
+        var result = await _staffService.ConfirmAndSetupStaffAsync(dto.UserId, dto.Token, dto.NewPassword);
+        if (!result) return BadRequest("Invalid or expired verification link.");
+        return Ok(new { message = "Account activated successfully." });
+    }
 }

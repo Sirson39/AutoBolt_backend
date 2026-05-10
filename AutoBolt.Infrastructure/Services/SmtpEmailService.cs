@@ -9,7 +9,7 @@ namespace AutoBolt.Infrastructure.Services;
 
 public class SmtpEmailService(IConfiguration configuration) : IEmailService
 {
-    public async Task SendInvoiceEmailAsync(string recipientEmail, InvoiceDto invoice)
+    public async Task SendEmailAsync(string recipientEmail, string subject, string htmlBody)
     {
         var host = configuration["Smtp:Host"];
         var port = int.TryParse(configuration["Smtp:Port"], out var parsedPort) ? parsedPort : 587;
@@ -30,8 +30,8 @@ public class SmtpEmailService(IConfiguration configuration) : IEmailService
         using var message = new MailMessage
         {
             From = new MailAddress(fromEmail, fromName),
-            Subject = $"Your AutoBolt Invoice {invoice.InvoiceNumber}",
-            Body = BuildInvoiceHtml(invoice),
+            Subject = subject,
+            Body = htmlBody,
             IsBodyHtml = true
         };
 
@@ -43,7 +43,20 @@ public class SmtpEmailService(IConfiguration configuration) : IEmailService
             Credentials = new NetworkCredential(username, password)
         };
 
-        await client.SendMailAsync(message);
+        try
+        {
+            await client.SendMailAsync(message);
+        }
+        catch (Exception ex)
+        {
+            var innerMsg = ex.InnerException != null ? $" ({ex.InnerException.Message})" : "";
+            throw new Exception($"SMTP Error: {ex.Message}{innerMsg}");
+        }
+    }
+
+    public async Task SendInvoiceEmailAsync(string recipientEmail, InvoiceDto invoice)
+    {
+        await SendEmailAsync(recipientEmail, $"Your AutoBolt Invoice {invoice.InvoiceNumber}", BuildInvoiceHtml(invoice));
     }
 
     private static string BuildInvoiceHtml(InvoiceDto invoice)
