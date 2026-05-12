@@ -22,6 +22,8 @@ public class AutoBoltDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
     public DbSet<PurchaseInvoiceItem> PurchaseInvoiceItems { get; set; }
     public DbSet<ShopConfiguration> ShopConfigurations { get; set; }
+    public DbSet<PartRequest> PartRequests { get; set; }
+    public DbSet<ServiceReview> ServiceReviews { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
