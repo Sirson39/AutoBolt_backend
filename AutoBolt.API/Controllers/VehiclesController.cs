@@ -26,6 +26,7 @@ public class VehiclesController(IVehicleService vehicleService) : ControllerBase
     }
 
     [HttpGet("customer/{customerId}")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<VehicleDto>>> GetByCustomerId(int customerId)
     {
         var vehicles = await vehicleService.GetVehiclesByCustomerIdAsync(customerId);
@@ -33,6 +34,7 @@ public class VehiclesController(IVehicleService vehicleService) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<VehicleDto>> Create(VehicleCreateUpdateDto dto)
     {
         try
