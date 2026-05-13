@@ -34,6 +34,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     }
 
     [HttpGet("customer/{customerId}")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<BookingDto>>> GetByCustomer(int customerId)
     {
         var bookings = await bookingService.GetBookingsByCustomerIdAsync(customerId);
