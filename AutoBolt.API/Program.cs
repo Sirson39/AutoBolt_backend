@@ -1,5 +1,6 @@
 using AutoBolt.Application;
 using AutoBolt.Infrastructure;
+using AutoBolt.Infrastructure.Services.BackgroundJobs;
 using AutoBolt.Infrastructure.Data;
 using AutoBolt.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +14,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddHostedService<LowStockAlertService>();
+builder.Services.AddHostedService<OverdueCreditReminderService>();
 
 builder.Services.AddCors(options =>
 {
