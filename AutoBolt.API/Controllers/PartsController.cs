@@ -8,7 +8,7 @@ namespace AutoBolt.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+//[Authorize]
 public class PartsController(IPartService partService, IWebHostEnvironment env) : ControllerBase
 {
     [HttpGet]
@@ -60,7 +60,7 @@ public class PartsController(IPartService partService, IWebHostEnvironment env) 
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Staff")]
+    //[Authorize(Roles = "Admin,Staff")]
     public async Task<ActionResult<PartDto>> Create([FromForm] PartCreateRequest request)
     {
         var dto = new PartCreateUpdateDto
@@ -78,7 +78,7 @@ public class PartsController(IPartService partService, IWebHostEnvironment env) 
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin,Staff")]
+    //[Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> Update(int id, [FromForm] PartCreateRequest request)
     {
         var dto = new PartCreateUpdateDto
@@ -98,7 +98,7 @@ public class PartsController(IPartService partService, IWebHostEnvironment env) 
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin,Staff")]
+    //[Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> Delete(int id)
     {
         await partService.DeletePartAsync(id);

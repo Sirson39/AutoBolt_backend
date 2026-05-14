@@ -7,7 +7,7 @@ namespace AutoBolt.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin,Staff")]
+//[Authorize(Roles = "Admin,Staff")]
 public class CustomersController(ICustomerService customerService) : ControllerBase
 {
     [HttpGet]

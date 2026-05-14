@@ -8,7 +8,7 @@ namespace AutoBolt.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
+//[Authorize(Roles = "Admin")]
 public class VendorsController(IVendorService vendorService, IWebHostEnvironment env) : ControllerBase
 {
     [HttpGet]

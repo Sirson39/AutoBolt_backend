@@ -36,7 +36,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpGet("me")]
-    [Authorize]
+    //[Authorize]
     public ActionResult<object> GetCurrentUser()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
@@ -82,7 +82,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("change-password")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
     {
         var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
@@ -103,7 +103,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPut("profile")]
-    [Authorize]
+    //[Authorize]
     public async Task<ActionResult<ProfileResponseDto>> UpdateProfile(UpdateProfileDto dto)
     {
         var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value

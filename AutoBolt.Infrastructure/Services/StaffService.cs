@@ -6,6 +6,7 @@ using AutoBolt.Infrastructure.Data;
 using AutoBolt.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace AutoBolt.Infrastructure.Services;
 
@@ -14,12 +15,14 @@ public class StaffService : IStaffService
     private readonly AutoBoltDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IEmailService _emailService;
+    private readonly IConfiguration _config;
 
-    public StaffService(AutoBoltDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService)
+    public StaffService(AutoBoltDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService, IConfiguration config)
     {
         _context = context;
         _userManager = userManager;
         _emailService = emailService;
+        _config = config;
     }
 
     public async Task<IEnumerable<UserDto>> GetAllStaffAsync()
@@ -73,7 +76,8 @@ public class StaffService : IStaffService
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var encodedToken = WebUtility.UrlEncode(token);
-        var verifyLink = $"http://localhost:5173/#verify-email?userId={user.Id}&token={encodedToken}";
+        var frontendUrl = _config["FrontendUrl"] ?? "http://localhost:5173";
+        var verifyLink = $"{frontendUrl}/#verify-email?userId={user.Id}&token={encodedToken}";
 
         try
         {
@@ -121,7 +125,7 @@ public class StaffService : IStaffService
                     <p>Hello {user.FullName}, your AutoBolt staff account is now fully active.</p>
                     <p>You can log in using your email and the password you just set.</p>
                     <div style=""text-align: center; margin: 30px 0;"">
-                        <a href=""http://localhost:5173/#signin"" style=""background: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;"">Go to Dashboard</a>
+                        <a href=""{_config["FrontendUrl"] ?? "http://localhost:5173"}/#signin"" style=""background: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;"">Go to Dashboard</a>
                     </div>
                 </div>
             ");
@@ -226,7 +230,7 @@ public class StaffService : IStaffService
                         <p><strong>New Password:</strong> {newPassword}</p>
                     </div>
                     <p style='color: #ef4444;'>Please log in and change your password immediately.</p>
-                    <p>Login at: <a href='http://localhost:5173'>AutoBolt Portal</a></p>
+                    <p>Login at: <a href='{_config["FrontendUrl"] ?? "http://localhost:5173"}'>AutoBolt Portal</a></p>
                     <hr/>
                     <p style='color: #6b7280; font-size: 12px;'>AutoBolt Vehicle Parts &amp; Service Management</p>
                 </div>");

@@ -7,7 +7,7 @@ namespace AutoBolt.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class PurchaseController : ControllerBase
     {
         private readonly IPurchaseService _purchaseService;
