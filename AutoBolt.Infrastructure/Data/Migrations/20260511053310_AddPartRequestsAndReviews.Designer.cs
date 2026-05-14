@@ -3,6 +3,7 @@ using System;
 using AutoBolt.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoBolt.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AutoBoltDbContext))]
-    partial class AutoBoltDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260511053310_AddPartRequestsAndReviews")]
+    partial class AddPartRequestsAndReviews
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -351,8 +354,6 @@ namespace AutoBolt.Infrastructure.Data.Migrations
                     b.ToTable("PurchaseInvoiceItems");
                 });
 
-<<<<<<< HEAD
-=======
             modelBuilder.Entity("AutoBolt.Domain.Entities.ServiceReview", b =>
                 {
                     b.Property<int>("Id")
@@ -391,7 +392,6 @@ namespace AutoBolt.Infrastructure.Data.Migrations
                     b.ToTable("ServiceReviews");
                 });
 
->>>>>>> cc4e518100d886c9a1be5f02dece51fda689487b
             modelBuilder.Entity("AutoBolt.Domain.Entities.ShopConfiguration", b =>
                 {
                     b.Property<int>("Id")

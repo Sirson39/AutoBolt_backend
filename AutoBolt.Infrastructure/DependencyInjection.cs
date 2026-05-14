@@ -83,6 +83,10 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailService, SmtpEmailService>();
         services.AddScoped<IShopService, ShopService>();
+        services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<IPartRequestService, PartRequestService>();
+        services.AddScoped<IServiceReviewService, ServiceReviewService>();
+        services.AddScoped<IVehiclePredictionService, VehiclePredictionService>();
 
 
         return services;
