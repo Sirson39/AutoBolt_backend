@@ -10,7 +10,7 @@ namespace AutoBolt.API.Controllers;
 public class ServiceReviewsController(IServiceReviewService reviewService) : ControllerBase
 {
     [HttpGet]
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "Admin,Staff")]
     public async Task<ActionResult<IEnumerable<ServiceReviewDto>>> GetAll()
     {
         return Ok(await reviewService.GetAllAsync());

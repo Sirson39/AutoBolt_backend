@@ -8,10 +8,11 @@ namespace AutoBolt.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin,Staff")]
+[Authorize(AuthenticationSchemes = "Bearer")]
 public class BookingsController(IBookingService bookingService) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<ActionResult<IEnumerable<BookingDto>>> GetAll()
     {
         var bookings = await bookingService.GetAllBookingsAsync();
@@ -19,6 +20,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     }
 
     [HttpGet("upcoming")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<ActionResult<IEnumerable<BookingDto>>> GetUpcoming()
     {
         var bookings = await bookingService.GetUpcomingBookingsAsync();
@@ -57,6 +59,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     }
 
     [HttpPatch("{id}/status")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> UpdateStatus(int id, BookingUpdateStatusDto dto)
     {
         var result = await bookingService.UpdateBookingStatusAsync(id, dto.Status);

@@ -11,6 +11,7 @@ public class VehicleDto
     public int Year { get; set; }
     public double Mileage { get; set; }
     public int PlateType { get; set; }
+    public int CustomerId { get; set; }
     public string OwnerName { get; set; } = null!;
 }
 

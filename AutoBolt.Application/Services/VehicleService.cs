@@ -88,6 +88,7 @@ public class VehicleService(IVehicleRepository vehicleRepository, ICustomerRepos
             Year = vehicle.Year,
             Mileage = vehicle.Mileage,
             PlateType = (int)vehicle.PlateType,
+            CustomerId = vehicle.CustomerId,
             OwnerName = vehicle.Owner?.FullName ?? "Unknown"
         };
     }

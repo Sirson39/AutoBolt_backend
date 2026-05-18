@@ -61,7 +61,7 @@ public class BookingService(
 
         var booking = new Booking
         {
-            ServiceDate = dto.ServiceDate,
+            ServiceDate = dto.ServiceDate.ToUniversalTime(),
             Description = dto.Description,
             Status = BookingStatus.Pending,
             CustomerId = dto.CustomerId,

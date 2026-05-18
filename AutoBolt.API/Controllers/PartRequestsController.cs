@@ -8,10 +8,11 @@ namespace AutoBolt.API.Controllers;
 
 [ApiController]
 [Route("api/part-requests")]
-[Authorize(Roles = "Admin,Staff")]
+[Authorize(AuthenticationSchemes = "Bearer")]
 public class PartRequestsController(IPartRequestService partRequestService) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<ActionResult<IEnumerable<PartRequestDto>>> GetAll()
     {
         return Ok(await partRequestService.GetAllAsync());
@@ -33,6 +34,7 @@ public class PartRequestsController(IPartRequestService partRequestService) : Co
     }
 
     [HttpPatch("{id}/status")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> UpdateStatus(int id, PartRequestUpdateStatusDto dto)
     {
         var result = await partRequestService.UpdateStatusAsync(id, dto.Status);

@@ -63,7 +63,8 @@ public class AuthService : IAuthService
             Role = role,
             FullName = user.FullName,
             Email = user.Email!,
-            Expiry = expiry
+            Expiry = expiry,
+            CustomerId = customerId
         };
     }
 
@@ -175,7 +176,8 @@ public class AuthService : IAuthService
             Role = "Customer",
             FullName = user.FullName,
             Email = user.Email!,
-            Expiry = DateTime.UtcNow.AddMinutes(60)
+            Expiry = DateTime.UtcNow.AddMinutes(60),
+            CustomerId = customer.Id
         };
     }
 

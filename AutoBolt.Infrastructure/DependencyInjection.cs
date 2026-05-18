@@ -62,7 +62,9 @@ public static class DependencyInjection
                 ValidAudience = jwtSettings.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(jwtSettings.Secret)),
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
+                RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+                NameClaimType = System.Security.Claims.ClaimTypes.Name
             };
             options.IncludeErrorDetails = true;
         });
