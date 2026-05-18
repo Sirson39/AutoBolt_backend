@@ -23,6 +23,9 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(AutoBoltDbContext).Assembly.FullName)));
 
+        // Memory Cache for OTPs
+        services.AddMemoryCache();
+
         // ASP.NET Core Identity with int primary keys
         services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
         {
@@ -61,6 +64,7 @@ public static class DependencyInjection
                     Encoding.UTF8.GetBytes(jwtSettings.Secret)),
                 ClockSkew = TimeSpan.Zero
             };
+            options.IncludeErrorDetails = true;
         });
 
         // Email

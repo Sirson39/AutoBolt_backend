@@ -20,6 +20,21 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok(response);
     }
 
+    [HttpPost("send-registration-otp")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SendRegistrationOtp(SendRegistrationOtpDto dto)
+    {
+        try
+        {
+            await authService.SendRegistrationOtpAsync(dto);
+            return Ok(new { message = "Verification code sent to your email." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponseDto>> RegisterCustomer(CustomerRegisterDto dto)

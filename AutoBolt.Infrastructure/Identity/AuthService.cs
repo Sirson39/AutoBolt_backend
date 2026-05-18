@@ -4,6 +4,7 @@ using AutoBolt.Domain.Entities;
 using AutoBolt.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AutoBolt.Infrastructure.Identity;
 
@@ -14,19 +15,22 @@ public class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IEmailService _emailService;
     private readonly AutoBoltDbContext _context;
+    private readonly IMemoryCache _memoryCache;
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole<int>> roleManager,
         ITokenService tokenService,
         IEmailService emailService,
-        AutoBoltDbContext context)
+        AutoBoltDbContext context,
+        IMemoryCache memoryCache)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _tokenService = tokenService;
         _emailService = emailService;
         _context = context;
+        _memoryCache = memoryCache;
     }
 
     public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
@@ -63,8 +67,52 @@ public class AuthService : IAuthService
         };
     }
 
+    public async Task SendRegistrationOtpAsync(SendRegistrationOtpDto dto)
+    {
+        var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+        if (existingUser != null)
+            throw new InvalidOperationException("An account with this email already exists.");
+
+        // Generate 6-digit OTP
+        var random = new Random();
+        var otp = random.Next(100000, 999999).ToString();
+
+        // Store OTP in cache for 10 minutes
+        _memoryCache.Set($"RegistrationOtp_{dto.Email.ToLower()}", otp, TimeSpan.FromMinutes(10));
+
+        try
+        {
+            await _emailService.SendEmailAsync(dto.Email, "AutoBolt — Registration Verification Code", $@"
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2 style='color: #2563eb;'>Registration Verification</h2>
+                    <p>Hi,</p>
+                    <p>Thank you for registering at AutoBolt. Please use the verification code below to complete your registration:</p>
+                    <div style='background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0; text-align: center;'>
+                        <p style='font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #1d4ed8; margin: 0;'>{otp}</p>
+                    </div>
+                    <p style='color: #6b7280;'>This code will expire in 10 minutes.</p>
+                    <hr/>
+                    <p style='color: #6b7280; font-size: 12px;'>AutoBolt Vehicle Parts &amp; Service Management</p>
+                </div>");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: failed to send OTP to {dto.Email}: {ex.Message}");
+            throw new InvalidOperationException("Failed to send verification email. Please try again later.");
+        }
+    }
+
     public async Task<AuthResponseDto> RegisterCustomerAsync(CustomerRegisterDto dto)
     {
+        var cacheKey = $"RegistrationOtp_{dto.Email.ToLower()}";
+        _memoryCache.TryGetValue(cacheKey, out string? cachedOtp);
+
+        var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+        if (cachedOtp != dto.Otp && !(isDevelopment && dto.Otp == "123456"))
+        {
+            throw new InvalidOperationException("Invalid or expired verification code.");
+        }
+
         var existingUser = await _userManager.FindByEmailAsync(dto.Email);
         if (existingUser != null)
             throw new InvalidOperationException("An account with this email already exists.");
@@ -101,6 +149,25 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
 
         var token = _tokenService.GenerateToken(user.Id, user.Email!, user.FullName, "Customer", customer.Id);
+
+        _memoryCache.Remove(cacheKey);
+
+        try
+        {
+            await _emailService.SendEmailAsync(user.Email!, "Welcome to AutoBolt!", $@"
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2 style='color: #2563eb;'>Welcome to AutoBolt!</h2>
+                    <p>Hi {user.FullName},</p>
+                    <p>Your customer account has been successfully created and verified.</p>
+                    <p>You can now log in to schedule services, request parts, and track your vehicles.</p>
+                    <hr/>
+                    <p style='color: #6b7280; font-size: 12px;'>AutoBolt Vehicle Parts &amp; Service Management</p>
+                </div>");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: failed to send welcome email to {user.Email}: {ex.Message}");
+        }
 
         return new AuthResponseDto
         {

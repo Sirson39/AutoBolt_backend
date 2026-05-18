@@ -30,6 +30,17 @@ public class CustomerRegisterDto
     public string Phone { get; set; } = string.Empty;
 
     public string? Address { get; set; }
+
+    [Required]
+    [StringLength(6, MinimumLength = 6, ErrorMessage = "Verification code must be 6 digits.")]
+    public string Otp { get; set; } = string.Empty;
+}
+
+public class SendRegistrationOtpDto
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
 }
 
 public class AuthResponseDto

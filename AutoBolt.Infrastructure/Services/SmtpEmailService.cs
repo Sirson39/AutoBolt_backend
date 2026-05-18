@@ -11,13 +11,13 @@ public class SmtpEmailService(IConfiguration configuration) : IEmailService
 {
     public async Task SendEmailAsync(string recipientEmail, string subject, string htmlBody)
     {
-        var host = configuration["Smtp:Host"];
-        var port = int.TryParse(configuration["Smtp:Port"], out var parsedPort) ? parsedPort : 587;
-        var username = configuration["Smtp:Username"];
-        var password = configuration["Smtp:Password"];
-        var fromEmail = configuration["Smtp:FromEmail"] ?? username;
-        var fromName = configuration["Smtp:FromName"] ?? "AutoBolt";
-        var enableSsl = !bool.TryParse(configuration["Smtp:EnableSsl"], out var parsedSsl) || parsedSsl;
+        var host = configuration["EmailSettings:Host"];
+        var port = int.TryParse(configuration["EmailSettings:Port"], out var parsedPort) ? parsedPort : 587;
+        var username = configuration["EmailSettings:SenderEmail"];
+        var password = configuration["EmailSettings:Password"];
+        var fromEmail = configuration["EmailSettings:SenderEmail"];
+        var fromName = configuration["EmailSettings:SenderName"] ?? "AutoBolt";
+        var enableSsl = !bool.TryParse(configuration["EmailSettings:EnableSsl"], out var parsedSsl) || parsedSsl;
 
         if (string.IsNullOrWhiteSpace(host) ||
             string.IsNullOrWhiteSpace(username) ||
@@ -49,6 +49,24 @@ public class SmtpEmailService(IConfiguration configuration) : IEmailService
         }
         catch (Exception ex)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("==================================================");
+            Console.WriteLine("DEVELOPMENT MODE - EMAIL SEND FAILURE BYPASS");
+            Console.WriteLine($"Recipient: {recipientEmail}");
+            Console.WriteLine($"Subject: {subject}");
+            Console.WriteLine("Body Content:");
+            Console.WriteLine(htmlBody);
+            Console.WriteLine($"Original Error: {ex.Message}");
+            Console.WriteLine("==================================================");
+            Console.ResetColor();
+
+            // If it is development environment, bypass and pretend it succeeded so developers can test!
+            var env = configuration["ASPNETCORE_ENVIRONMENT"] ?? "Production";
+            if (env.Equals("Development", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             var innerMsg = ex.InnerException != null ? $" ({ex.InnerException.Message})" : "";
             throw new Exception($"SMTP Error: {ex.Message}{innerMsg}");
         }
